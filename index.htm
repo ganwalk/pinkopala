@@ -8,15 +8,32 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* Sistema de Variáveis para Tema Claro / Escuro */
         :root {
             --neon-pink: #ff00aa;
+            --bg-color: #000000;
+            --bg-rgb: 0, 0, 0;
+            --text-color: #ffffff;
+            --muted-color: #9ca3af; /* gray-400 equivalent */
+            --border-color: rgba(255, 255, 255, 0.15);
+            --panel-bg: #111111;
+        }
+
+        .light-mode {
+            --bg-color: #ffffff;
+            --bg-rgb: 255, 255, 255;
+            --text-color: #000000;
+            --muted-color: #4b5563; /* gray-600 equivalent */
+            --border-color: rgba(0, 0, 0, 0.15);
+            --panel-bg: #f9fafb;
         }
         
         body {
-            background-color: #000;
-            color: #fff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: 'Space Grotesk', sans-serif;
             overflow-x: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
         h1, h2, h3, .font-display {
@@ -24,13 +41,9 @@
             text-transform: uppercase;
         }
 
-        #sand-canvas {
-            /* Glow removido a pedido */
-        }
-
         .nav-link {
             position: relative;
-            transition: all 0.3s ease;
+            transition: color 0.3s ease;
         }
         .nav-link:hover {
             color: var(--neon-pink);
@@ -51,9 +64,10 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Scrollbar dinâmico com o tema */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--muted-color); }
         ::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
 
         .scroll-hero {
@@ -76,10 +90,6 @@
             will-change: opacity, transform;
             z-index: 10;
             position: relative;
-        }
-        
-        .title-glow {
-            /* Glow removido a pedido */
         }
 
         .hero-img-anim {
@@ -118,7 +128,7 @@
             opacity: 0;
             transform: translateY(40px);
             z-index: 15;
-            background: linear-gradient(to right, transparent, rgba(0,0,0,0.95) 15%, #000 100%);
+            background: linear-gradient(to right, transparent, rgba(var(--bg-rgb), 0.95) 15%, var(--bg-color) 100%);
         }
         @media (max-width: 768px) {
             .sobre-reveal {
@@ -126,26 +136,33 @@
                 height: 50vh;
                 top: 50vh;
                 padding: 2rem;
-                background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.95) 15%, #000 100%);
+                background: linear-gradient(to bottom, transparent, rgba(var(--bg-rgb), 0.95) 15%, var(--bg-color) 100%);
             }
         }
 
         .dash-container { max-width: 1600px; margin: 0 auto; }
         .dash-audio-player {
-            background: #111;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
+            transition: background-color 0.5s ease, border-color 0.5s ease;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-pink-600 selection:text-white">
+<body class="antialiased selection:bg-pink-600 selection:text-[var(--bg-color)] transition-colors duration-500">
+
+    <!-- Botão de Alternar Tema (Claro / Escuro) -->
+    <button id="theme-toggle" class="fixed top-4 right-4 md:top-6 md:right-6 z-[200] w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--panel-bg)] text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:border-[var(--neon-pink)] transition-all shadow-lg" title="Mudar Tema">
+        <span class="icon-sun block"><i data-lucide="sun" class="w-5 h-5"></i></span>
+        <span class="icon-moon hidden"><i data-lucide="moon" class="w-5 h-5"></i></span>
+    </button>
 
     <!-- Navegação Superior (Surge na 3ª Dobra) -->
-    <nav id="top-nav" class="fixed top-0 w-full z-[100] bg-black/95 backdrop-blur-md border-b border-white/10 p-4 md:p-6 flex justify-between items-center transition-transform duration-500 transform -translate-y-full">
+    <nav id="top-nav" class="fixed top-0 w-full z-[100] bg-[rgba(var(--bg-rgb),0.95)] backdrop-blur-md border-b border-[var(--border-color)] p-4 md:p-6 flex justify-between items-center transition-all duration-500 transform -translate-y-full text-[var(--text-color)]">
         <button onclick="window.scrollTo({top:0, behavior:'smooth'});" class="text-xl md:text-2xl font-display tracking-tighter hover:text-[var(--neon-pink)] transition-colors focus:outline-none">
             PINK OPALA
         </button>
-        <ul class="flex space-x-4 md:space-x-8 text-[10px] md:text-sm font-bold tracking-widest font-mono">
+        <ul class="flex space-x-4 md:space-x-8 text-[10px] md:text-sm font-bold tracking-widest font-mono mr-12">
             <li class="hidden sm:block"><a href="#obra" class="nav-link">OBRA</a></li>
             <li><a href="#fotos" class="nav-link">GALERIA</a></li>
             <li><a href="#contacto" class="nav-link">CONTATO</a></li>
@@ -157,23 +174,20 @@
         
         <div class="sticky-hero">
             
-            <!-- Canvas para o Efeito de Partículas (Areia). Agora já começa visível -->
+            <!-- Canvas para o Efeito de Partículas (Areia) -->
             <canvas id="sand-canvas" class="absolute inset-0 w-full h-full z-[12]" style="pointer-events: none;"></canvas>
 
             <!-- Imagem animada -->
-            <div class="hero-img-anim opacity-0 transition-opacity duration-500 cursor-pointer" id="hero-img-anim" title="Clique para nos conhecer!">
-                <img src="https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=1920&q=80" alt="Banda Pink Opala">
+            <div class="hero-img-anim opacity-0 transition-opacity duration-500 cursor-pointer" id="hero-img-anim" title="Clique para explorar">
+                <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" alt="Banda Pink Opala">
             </div>
 
             <div class="intro-content px-4" id="intro-content">
-                <!-- Título fatiado em SPANS para transição transparente. Altura da linha reduzida (leading-[0.85]) -->
                 <h1 id="main-title" class="text-[5.5rem] sm:text-[9rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] tracking-tighter w-full break-words title-glow">
                     <span id="pink-text" class="transition-opacity duration-500 inline-block">PINK</span><br>
-                    <!-- Espaçamento extra à direita reduzido e ajuste vertical fino para cima -->
                     <span id="o-placeholder" class="text-transparent select-none relative inline-block mr-[0.08em] -top-[0.04em]">O</span><span id="pala-text" class="transition-opacity duration-500 inline-block">PALA</span>
                 </h1>
                 
-                <!-- Novo indicador a apontar para a imagem com animação de texto cíclica (agora centralizado com o O e mais próximo) -->
                 <div id="discover-indicator" class="absolute top-[100%] pt-1 flex flex-col items-center opacity-70 cursor-pointer transition-opacity hover:opacity-100" title="Clique para explorar">
                     <i data-lucide="arrow-up" class="w-6 h-6 text-[var(--neon-pink)] animate-bounce mb-2"></i>
                     <span id="discover-text" class="text-xs text-[var(--neon-pink)] uppercase tracking-widest font-mono min-w-[150px] text-center transition-all">NOS CONHEÇA</span>
@@ -181,13 +195,13 @@
             </div>
 
             <div class="sobre-reveal" id="sobre-reveal">
-                <h2 class="text-5xl md:text-7xl mb-8 border-b-2 border-white/20 pb-4 font-display">A BANDA</h2>
-                <div class="space-y-6 text-gray-300 text-lg md:text-xl leading-relaxed">
+                <h2 class="text-5xl md:text-7xl mb-8 border-b-2 border-[var(--border-color)] pb-4 font-display">A BANDA</h2>
+                <div class="space-y-6 text-[var(--muted-color)] text-lg md:text-xl leading-relaxed transition-colors">
                     <p>
                         Nascidos das noites quentes e da vontade de fazer dançar, os Pink Opala trazem uma energia crua que mistura o groove dos anos 70 com a estética moderna e brutalista.
                     </p>
                     <div class="pt-6">
-                        <button id="btn-next-dash" class="bg-white text-black font-bold px-8 py-3 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-white transition-colors tracking-widest uppercase font-mono inline-flex items-center gap-2">
+                        <button id="btn-next-dash" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-8 py-3 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors tracking-widest uppercase font-mono inline-flex items-center gap-2">
                             Explorar <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -197,13 +211,13 @@
     </section>
 
     <!-- NOVO DASHBOARD APÓS O SCROLL -->
-    <main class="dash-container px-4 md:px-8 py-20 relative z-10 bg-black">
+    <main class="dash-container px-4 md:px-8 py-20 relative z-10 bg-[var(--bg-color)] transition-colors duration-500">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             
             <div class="flex flex-col gap-6">
-                <h2 class="text-4xl font-display tracking-tight">A BANDA</h2>
-                <img src="https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=800&q=80" alt="Banda Pink Opala" class="w-full h-auto img-bw rounded-sm border border-white/10">
-                <div class="text-xs text-gray-400 space-y-4 leading-relaxed text-justify pr-2">
+                <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">A BANDA</h2>
+                <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" alt="Banda Pink Opala" class="w-full h-auto img-bw rounded-sm border border-[var(--border-color)]">
+                <div class="text-xs text-[var(--muted-color)] space-y-4 leading-relaxed text-justify pr-2 transition-colors">
                     <p>A essência da Pink Opala reflete a vibração caótica e poética das grandes cidades. Trazendo um som que mistura as raízes do disco funk brasileiro com sintetizadores espaciais.</p>
                     <p>A banda tem se destacado nos palcos underground por sua performance visceral e arranjos autênticos, criando uma conexão profunda com o público e revolucionando a cena local.</p>
                     <p>Com o lançamento de seu primeiro álbum "Opala Rosa", eles solidificam a identidade visual e sonora da banda, buscando sempre a inovação analógica e psicodélica.</p>
@@ -211,17 +225,17 @@
             </div>
 
             <div id="obra" class="flex flex-col gap-6 scroll-mt-32">
-                <h2 class="text-4xl font-display tracking-tight">DISCOGRAFIA</h2>
+                <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">DISCOGRAFIA</h2>
                 
                 <div class="flex gap-4 items-center group">
                     <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&w=150&q=80" alt="Capa" class="w-20 h-20 object-cover rounded-sm img-bw group-hover:filter-none transition-all">
                     <div class="flex-1 flex flex-col gap-2">
-                        <span class="text-xs font-bold font-mono text-white">Álbum: Opala Rosa (2022)</span>
+                        <span class="text-xs font-bold font-mono text-[var(--text-color)] transition-colors">Álbum: Opala Rosa (2022)</span>
                         <div class="dash-audio-player flex items-center gap-3 px-3 py-2">
-                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
-                            <div class="h-1 flex-1 bg-white/20 rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-1/3 bg-white rounded-full"></div></div>
-                            <span class="text-[10px] font-mono text-gray-400">0:00</span>
-                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
+                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
+                            <div class="h-1 flex-1 bg-[var(--border-color)] rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-1/3 bg-[var(--text-color)] rounded-full transition-colors"></div></div>
+                            <span class="text-[10px] font-mono text-[var(--muted-color)] transition-colors">0:00</span>
+                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
                         </div>
                     </div>
                 </div>
@@ -229,12 +243,12 @@
                 <div class="flex gap-4 items-center group">
                     <img src="https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=150&q=80" alt="Capa" class="w-20 h-20 object-cover rounded-sm img-bw group-hover:filter-none transition-all">
                     <div class="flex-1 flex flex-col gap-2">
-                        <span class="text-xs font-bold font-mono text-white">Single: Noites de Verão (2023)</span>
+                        <span class="text-xs font-bold font-mono text-[var(--text-color)] transition-colors">Single: Noites de Verão (2023)</span>
                         <div class="dash-audio-player flex items-center gap-3 px-3 py-2">
-                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
-                            <div class="h-1 flex-1 bg-white/20 rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-0 bg-white rounded-full"></div></div>
-                            <span class="text-[10px] font-mono text-gray-400">0:00</span>
-                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
+                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
+                            <div class="h-1 flex-1 bg-[var(--border-color)] rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-0 bg-[var(--text-color)] rounded-full transition-colors"></div></div>
+                            <span class="text-[10px] font-mono text-[var(--muted-color)] transition-colors">0:00</span>
+                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
                         </div>
                     </div>
                 </div>
@@ -242,48 +256,48 @@
                 <div class="flex gap-4 items-center group">
                     <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80" alt="Capa" class="w-20 h-20 object-cover rounded-sm img-bw group-hover:filter-none transition-all">
                     <div class="flex-1 flex flex-col gap-2">
-                        <span class="text-xs font-bold font-mono text-white">Álbum: Sintetizador (2024)</span>
+                        <span class="text-xs font-bold font-mono text-[var(--text-color)] transition-colors">Álbum: Sintetizador (2024)</span>
                         <div class="dash-audio-player flex items-center gap-3 px-3 py-2">
-                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
-                            <div class="h-1 flex-1 bg-white/20 rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-0 bg-white rounded-full"></div></div>
-                            <span class="text-[10px] font-mono text-gray-400">0:00</span>
-                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors"></i>
+                            <i data-lucide="play" class="w-3 h-3 fill-current cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
+                            <div class="h-1 flex-1 bg-[var(--border-color)] rounded-full cursor-pointer relative"><div class="absolute top-0 left-0 h-full w-0 bg-[var(--text-color)] rounded-full transition-colors"></div></div>
+                            <span class="text-[10px] font-mono text-[var(--muted-color)] transition-colors">0:00</span>
+                            <i data-lucide="volume-2" class="w-3 h-3 cursor-pointer hover:text-[var(--neon-pink)] transition-colors text-[var(--text-color)]"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="fotos" class="flex flex-col gap-6 scroll-mt-32">
-                <h2 class="text-4xl font-display tracking-tight">GALERIA</h2>
+                <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">GALERIA</h2>
                 <div class="grid grid-cols-2 gap-2">
-                    <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
-                    <img src="https://images.unsplash.com/photo-1493225457124-a1a2a5f5f924?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
-                    <img src="https://images.unsplash.com/photo-1598387181032-a310322db565?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
-                    <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
-                    <img src="https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
-                    <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-white/10">
+                    <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
+                    <img src="https://images.unsplash.com/photo-1493225457124-a1a2a5f5f924?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
+                    <img src="https://images.unsplash.com/photo-1598387181032-a310322db565?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
+                    <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
+                    <img src="https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
+                    <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=300&q=80" class="w-full h-24 md:h-28 object-cover rounded-sm img-bw hover:filter-none transition-all cursor-pointer border border-[var(--border-color)]">
                 </div>
             </div>
 
             <div id="contacto" class="flex flex-col gap-6 relative scroll-mt-32">
-                <h2 class="text-4xl font-display tracking-tight">CONTATO e APOIE</h2>
+                <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">CONTATO e APOIE</h2>
                 <form onsubmit="event.preventDefault();" class="flex flex-col gap-3">
                     <div class="flex gap-3">
-                        <input type="text" placeholder="Nome" class="bg-transparent border border-white/30 rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono">
-                        <input type="email" placeholder="Email" class="bg-transparent border border-white/30 rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono">
+                        <input type="text" placeholder="Nome" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                        <input type="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
                     </div>
-                    <textarea placeholder="Mensagem" rows="3" class="bg-transparent border border-white/30 rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono"></textarea>
+                    <textarea placeholder="Mensagem" rows="3" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
                     
                     <div class="flex gap-3 items-center mt-2">
-                        <button type="submit" class="bg-white text-black font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-white transition-colors">Enviar</button>
-                        <button type="button" class="bg-white text-black font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-white transition-colors">Apoie a Banda</button>
-                        <div class="text-[9px] font-mono text-gray-400 ml-auto leading-tight text-right hidden sm:block">Booking info:<br>Meltoons ele S/N 393 1524</div>
+                        <button type="submit" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Enviar</button>
+                        <button type="button" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Apoie a Banda</button>
+                        <div class="text-[9px] font-mono text-[var(--muted-color)] ml-auto leading-tight text-right hidden sm:block transition-colors">Booking info:<br>Meltoons ele S/N 393 1524</div>
                     </div>
                 </form>
 
-                <h2 id="links" class="text-4xl font-display tracking-tight mt-6 scroll-mt-32">LINKS</h2>
+                <h2 id="links" class="text-4xl font-display tracking-tight mt-6 scroll-mt-32 text-[var(--text-color)]">LINKS</h2>
                 <div class="flex flex-col gap-4">
-                    <ul class="text-xs font-mono space-y-2 text-gray-300">
+                    <ul class="text-xs font-mono space-y-2 text-[var(--muted-color)] transition-colors">
                         <li><a href="#fotos" class="hover:text-[var(--neon-pink)] transition-colors">Fotos</a></li>
                         <li><a href="#obra" class="hover:text-[var(--neon-pink)] transition-colors">Obra</a></li>
                         <li><a href="#sobre" class="hover:text-[var(--neon-pink)] transition-colors">Sobre</a></li>
@@ -291,36 +305,60 @@
                         <li><a href="#links" class="hover:text-[var(--neon-pink)] transition-colors">Links</a></li>
                     </ul>
                     <div>
-                        <span class="text-xs font-bold font-mono block mb-2">SOCIALS</span>
+                        <span class="text-xs font-bold font-mono block mb-2 text-[var(--text-color)]">SOCIALS</span>
                         <div class="flex gap-3">
-                            <a href="#" class="text-gray-400 hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="music-2" class="w-4 h-4"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
-                            <a href="#" class="text-gray-400 hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                            <a href="#" class="text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                            <a href="#" class="text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="music-2" class="w-4 h-4"></i></a>
+                            <a href="#" class="text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                            <a href="#" class="text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="youtube" class="w-4 h-4"></i></a>
                         </div>
                     </div>
                 </div>
 
                 <div class="absolute bottom-[-10px] right-[-10px] w-32 h-32 flex justify-center items-center pointer-events-none hidden lg:flex">
-                    <div class="w-full h-full border-[2px] border-dashed border-white/20 rounded-full spin-slow flex justify-center items-center relative">
-                        <span class="text-[8px] font-mono text-white/30 tracking-widest absolute top-1">1000</span>
-                        <span class="text-[8px] font-mono text-white/30 tracking-widest absolute bottom-1">500</span>
-                        <span class="text-[8px] font-mono text-white/30 tracking-widest absolute left-1">250</span>
-                        <span class="text-[8px] font-mono text-white/30 tracking-widest absolute right-1">750</span>
+                    <div class="w-full h-full border-[2px] border-dashed border-[var(--border-color)] rounded-full spin-slow flex justify-center items-center relative transition-colors">
+                        <span class="text-[8px] font-mono text-[var(--text-color)] opacity-30 tracking-widest absolute top-1 transition-colors">1000</span>
+                        <span class="text-[8px] font-mono text-[var(--text-color)] opacity-30 tracking-widest absolute bottom-1 transition-colors">500</span>
+                        <span class="text-[8px] font-mono text-[var(--text-color)] opacity-30 tracking-widest absolute left-1 transition-colors">250</span>
+                        <span class="text-[8px] font-mono text-[var(--text-color)] opacity-30 tracking-widest absolute right-1 transition-colors">750</span>
                     </div>
                     <div class="absolute inset-0 flex flex-col justify-center items-center text-center">
-                        <i data-lucide="bird" class="w-5 h-5 text-white mb-1"></i>
-                        <span class="font-display tracking-tighter text-[10px] leading-none text-white">PINK<br>OPALA</span>
+                        <i data-lucide="bird" class="w-5 h-5 text-[var(--text-color)] mb-1 transition-colors"></i>
+                        <span class="font-display tracking-tighter text-[10px] leading-none text-[var(--text-color)] transition-colors">PINK<br>OPALA</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="mt-16 pt-6 border-t border-white/10 text-right text-[10px] font-mono text-gray-500">&copy; PINK OPALA 2026. DESIGN INSPIRADO EM SAVA.</div>
+        <div class="mt-16 pt-6 border-t border-[var(--border-color)] text-right text-[10px] font-mono text-[var(--muted-color)] transition-colors">&copy; PINK OPALA 2026. DESIGN INSPIRADO EM SAVA.</div>
     </main>
 
     <script>
         lucide.createIcons();
 
+        // --- SISTEMA DE MUDANÇA DE TEMA ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const iconSun = document.querySelector('.icon-sun');
+        const iconMoon = document.querySelector('.icon-moon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            
+            // Alterna o ícone sem ter de o re-renderizar do zero
+            if (isLight) {
+                iconSun.classList.add('hidden');
+                iconSun.classList.remove('block');
+                iconMoon.classList.remove('hidden');
+                iconMoon.classList.add('block');
+            } else {
+                iconMoon.classList.add('hidden');
+                iconMoon.classList.remove('block');
+                iconSun.classList.remove('hidden');
+                iconSun.classList.add('block');
+            }
+        });
+
+        // --- INTERATIVIDADE E SCROLL ---
         const scrollSection = document.querySelector('.scroll-hero');
         const heroImg = document.getElementById('hero-img-anim');
         const introContent = document.getElementById('intro-content');
@@ -356,7 +394,6 @@
                 cy: (oRect.top - stickyRect.top) + oRect.height / 2
             };
 
-            // Centraliza o indicador perfeitamente abaixo da letra "O"
             const discoverIndicator = document.getElementById('discover-indicator');
             if (discoverIndicator) {
                 const relativeCx = (oRect.left - introRect.left) + (oRect.width / 2);
@@ -380,7 +417,6 @@
             let progress = -rect.top / maxScroll;
             progress = Math.max(0, Math.min(1, progress));
 
-            // Reduzido o multiplicador para 0.88 para que o círculo caiba na perfeição sem tocar no P
             const oSize = baseO.width ? baseO.width * 0.88 : (isMobile ? 55 : 100);
             const targetW = isMobile ? winW : winW / 2;
             const targetH = isMobile ? winH / 2 : winH;
@@ -399,7 +435,6 @@
             const introOpacity = 1 - (progress * 3);
             const translateY = progress * -50;
             
-            // Ocultar e subir texto inicial e canvas da areia simultaneamente
             introContent.style.opacity = Math.max(0, introOpacity);
             introContent.style.transform = `translateY(${translateY}px)`;
             sandCanvas.style.opacity = Math.max(0, introOpacity);
@@ -409,7 +444,6 @@
             sobreReveal.style.opacity = sobreProgress;
             sobreReveal.style.transform = `translateY(${40 - (40 * sobreProgress)}px)`;
 
-            // Lógica do Menu Superior
             if (topNav) {
                 const dashRect = document.querySelector('.dash-container').getBoundingClientRect();
                 if (dashRect.top <= 100) {
@@ -433,7 +467,8 @@
 
             const style = window.getComputedStyle(pinkText);
             ctx.font = `${style.fontWeight} ${style.fontSize} "Archivo Black", sans-serif`;
-            ctx.fillStyle = '#ffffff'; // Desenhamos a branco para capturar as coordenadas de todos os grãos
+            // Desenha o texto temporariamente para mapear (a cor não importa aqui, é só para obter o Alpha)
+            ctx.fillStyle = '#ffffff'; 
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';
 
@@ -459,13 +494,12 @@
                             vx: 0, vy: 0,
                             size: Math.random() * 1.5 + 1,
                             mass: Math.random() * 0.6 + 0.4,
-                            colorFactor: 0 // Controla a transição entre 0 (branco) e 1 (rosa)
+                            colorFactor: 0
                         });
                     }
                 }
             }
 
-            // Oculta o texto real do DOM, pois o Canvas vai desenhá-lo com as partículas instantaneamente
             pinkText.style.opacity = '0';
             palaText.style.opacity = '0';
             
@@ -478,6 +512,7 @@
             ctx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
 
             const interactionRadius = window.innerWidth < 768 ? 40 : 60; 
+            const isLight = document.body.classList.contains('light-mode');
 
             for (let i = 0; i < sandParticles.length; i++) {
                 let p = sandParticles[i];
@@ -491,10 +526,8 @@
                     p.vx -= Math.cos(angle) * force * (10 / p.mass);
                     p.vy -= Math.sin(angle) * force * (10 / p.mass);
                     
-                    // Fica rosa quase instantaneamente ao sofrer o impacto
                     p.colorFactor = Math.min(1, p.colorFactor + 0.15);
                 } else {
-                    // Retorna suavemente para a cor branca
                     if (p.colorFactor > 0) {
                         p.colorFactor = Math.max(0, p.colorFactor - 0.015);
                     }
@@ -508,13 +541,24 @@
                 p.x += p.vx;
                 p.y += p.vy;
 
-                // Renderiza a cor com base no fator (transição do Branco #ffffff para o Rosa #ff00aa)
+                // Transição dinâmica de cor entre a cor base (Preto/Branco) e o Rosa dependendo do Modo Atual
                 if (p.colorFactor > 0) {
-                    const g = Math.floor(255 - (255 * p.colorFactor));
-                    const b = Math.floor(255 - (85 * p.colorFactor));
-                    ctx.fillStyle = `rgb(255, ${g}, ${b})`;
+                    let r, g, b;
+                    if (isLight) {
+                        // De Preto (0,0,0) para Rosa (255,0,170)
+                        r = Math.floor(255 * p.colorFactor);
+                        g = 0;
+                        b = Math.floor(170 * p.colorFactor);
+                    } else {
+                        // De Branco (255,255,255) para Rosa (255,0,170)
+                        r = 255;
+                        g = Math.floor(255 - (255 * p.colorFactor));
+                        b = Math.floor(255 - (85 * p.colorFactor));
+                    }
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
                 } else {
-                    ctx.fillStyle = '#ffffff';
+                    // Cor de repouso consoante o modo
+                    ctx.fillStyle = isLight ? '#000000' : '#ffffff';
                 }
 
                 ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -547,30 +591,28 @@
         document.fonts.ready.then(() => {
             updateLayoutCache();
             updateScrollAnim();
-            // Inicia o sistema de partículas de areia no momento em que as fontes ficam prontas
             initSandParticles();
         });
 
+        // Cliques e Navegações
         heroImg.addEventListener('click', () => {
             const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
             window.scrollTo({ top: targetY, behavior: 'smooth' });
         });
 
-        // Evento de clique para o novo indicador apontado para o "O"
         document.getElementById('discover-indicator')?.addEventListener('click', () => {
             const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
             window.scrollTo({ top: targetY, behavior: 'smooth' });
         });
 
-        // Animação cíclica do texto do indicador
         const discoverText = document.getElementById('discover-text');
         if (discoverText) {
             setInterval(() => {
                 setTimeout(() => discoverText.innerText = 'QUEM?', 0);
                 setTimeout(() => discoverText.innerText = 'WHO?', 500);
                 setTimeout(() => discoverText.innerText = 'GET TO KNOW US', 1000);
-                setTimeout(() => discoverText.innerText = 'NOS CONHEÇA', 2000); // Retorna ao repouso
-            }, 6000); // O ciclo repete-se a cada 6 segundos
+                setTimeout(() => discoverText.innerText = 'NOS CONHEÇA', 2000);
+            }, 6000);
         }
 
         document.getElementById('btn-next-dash')?.addEventListener('click', () => {
