@@ -184,7 +184,8 @@
                 <!-- Usado text-[21vw] e whitespace-nowrap para garantir que a palavra OPALA nunca se quebra no telemóvel -->
                 <h1 id="main-title" class="text-[21vw] sm:text-[9rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] tracking-tighter whitespace-nowrap title-glow inline-block relative">
                     <span id="pink-text" class="transition-opacity duration-500 inline-block">PINK</span><br>
-                    <span id="o-placeholder" class="text-transparent select-none relative inline-block mr-[0.08em] -top-[0.04em]">O</span><span id="pala-text" class="transition-opacity duration-500 inline-block">PALA</span>
+                    <!-- Ajuste fino de alinhamento: movido ainda mais para a DIREITA (left-[0.15em]) e com margem ajustada (mr-[0.15em]) -->
+                    <span id="o-placeholder" class="text-transparent select-none relative inline-block mr-[0.11em] top-[-0.1em] left-[0.15em]">O</span><span id="pala-text" class="transition-opacity duration-500 inline-block">PALA</span>
                 </h1>
                 
                 <div id="discover-indicator" class="absolute top-[100%] pt-2 sm:pt-1 flex flex-col items-center opacity-70 cursor-pointer transition-opacity hover:opacity-100" title="Clique para explorar">
@@ -550,16 +551,26 @@
 
             const style = window.getComputedStyle(pinkText);
             ctx.font = `${style.fontWeight} ${style.fontSize} "Archivo Black", sans-serif`;
-            // Desenha o texto temporariamente para mapear (a cor não importa aqui, é só para obter o Alpha)
+            
+            // HERDAR O ESPAÇAMENTO (Resolve a fuga do "P" para a esquerda)
+            ctx.letterSpacing = style.letterSpacing; 
+            
             ctx.fillStyle = '#ffffff'; 
             ctx.textBaseline = 'middle';
-            ctx.textAlign = 'center';
+            // ALINHAMENTO À ESQUERDA (Ancora o início da palavra perfeitamente)
+            ctx.textAlign = 'left'; 
 
             const pinkRect = pinkText.getBoundingClientRect();
             const palaRect = palaText.getBoundingClientRect();
 
-            ctx.fillText(pinkText.innerText, pinkRect.left + pinkRect.width/2, pinkRect.top + pinkRect.height/2);
-            ctx.fillText(palaText.innerText, palaRect.left + palaRect.width/2, palaRect.top + palaRect.height/2);
+            // CÁLCULO DA MICRO-COMPENSAÇÃO DO CSS LEADING
+            const fontSize = parseFloat(style.fontSize);
+            const yOffset = fontSize * 0.05; // Compensa o leading-[0.85] puxando o Canvas 5% para cima
+            const xOffset = fontSize * 0.01; // Ajuste fino mínimo para alinhar a extremidade
+
+            // Desenhar com os novos offsets e alinhamentos milimétricos
+            ctx.fillText(pinkText.innerText, pinkRect.left + xOffset, pinkRect.top + pinkRect.height/2 - yOffset);
+            ctx.fillText(palaText.innerText, palaRect.left + xOffset, palaRect.top + palaRect.height/2 - yOffset);
 
             const imgData = ctx.getImageData(0, 0, sandCanvas.width, sandCanvas.height).data;
             ctx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
@@ -572,9 +583,11 @@
                     const alpha = imgData[(y * sandCanvas.width + x) * 4 + 3];
                     if (alpha > 128) {
                         sandParticles.push({
-                            x: x, y: y,
+                            x: x, // Volta a nascer na posição exata do texto
+                            y: y, // Volta a nascer na posição exata do texto
                             originX: x, originY: y,
-                            vx: 0, vy: 0,
+                            vx: 0, // Sem inércia inicial
+                            vy: 0, // Sem inércia inicial
                             size: Math.random() * 1.5 + 1,
                             mass: Math.random() * 0.6 + 0.4,
                             colorFactor: 0
