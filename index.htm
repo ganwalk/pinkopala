@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pink Opala | Oficial</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="image" href="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" fetchpriority="high">
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         /* Sistema de Variáveis para Tema Claro / Escuro */
@@ -155,9 +158,54 @@
         /* Ocultar barra de rolagem nas miniaturas da galeria */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Bloqueia scroll enquanto a tela de carregamento está visível */
+        .is-loading { overflow: hidden; }
+
+        /* Tela de Carregamento */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background-color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.7s ease;
+        }
+        #loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-title {
+            font-family: 'Archivo Black', sans-serif;
+            text-transform: uppercase;
+            font-size: clamp(3rem, 14vw, 9rem);
+            line-height: 0.85;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: -0.04em;
+            text-shadow: 0 0 80px rgba(255, 0, 170, 0.15);
+            margin-bottom: 2.5rem;
+        }
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 2px solid rgba(255, 0, 170, 0.15);
+            border-top-color: #ff00aa;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
     </style>
 </head>
-<body class="antialiased selection:bg-pink-600 selection:text-[var(--bg-color)] transition-colors duration-500">
+<body class="antialiased is-loading selection:bg-pink-600 selection:text-[var(--bg-color)] transition-colors duration-500">
+
+    <!-- Tela de Carregamento -->
+    <div id="loading-screen">
+        <h1 class="loading-title">PINK<br>OPALA</h1>
+        <div class="loading-spinner"></div>
+    </div>
 
     <!-- Botão de Alternar Tema (Claro / Escuro) -->
     <button id="theme-toggle" class="fixed top-4 right-4 md:top-6 md:right-6 z-[200] w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--panel-bg)] text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:border-[var(--neon-pink)] transition-all shadow-lg" title="Mudar Tema">
@@ -228,7 +276,7 @@
             
             <div id="historia" class="flex flex-col gap-6 scroll-mt-32">
                 <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">HISTÓRIA</h2>
-                <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" alt="Banda Pink Opala" class="w-full h-auto rounded-sm border border-[var(--border-color)]">
+                <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" alt="Banda Pink Opala" loading="lazy" class="w-full h-auto rounded-sm border border-[var(--border-color)]">
                 <div class="text-xs text-[var(--muted-color)] space-y-4 leading-relaxed text-justify pr-2 transition-colors">
                     <p><strong class="text-[var(--text-color)]">FORMAÇÃO:</strong> Composto por Nataly Martins (voz, letras e sintetizadores) e João Victor Santana Campos (guitarra e programações), o projeto destaca-se pela construção artesanal de uma identidade sonora e visual consistente e letras em português.</p>
                     <button onclick="openModal('modal-historia')" class="text-[var(--text-color)] font-bold text-[10px] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest border-b border-[var(--border-color)] hover:border-[var(--neon-pink)] pb-0.5 inline-flex items-center gap-1 w-fit mt-2">Saiba Mais <i data-lucide="plus" class="w-3 h-3"></i></button>
@@ -239,7 +287,7 @@
                 <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">DISCOGRAFIA</h2>
                 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Bambolla%20Bakers%20%26%20Pink%20Opala.JPEG" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Bambolla%20Bakers%20%26%20Pink%20Opala.JPEG" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">EP: Bambolla Bakers & Pink Opala (2019)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -251,7 +299,7 @@
                 </div>
 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Toda%20Vida.jpeg" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Toda%20Vida.jpeg" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Single: Toda Vida (2020)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -263,7 +311,7 @@
                 </div>
 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Sempre%20Nunca.JPG" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Sempre%20Nunca.JPG" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Álbum: Sempre Nunca (2024)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -275,7 +323,7 @@
                 </div>
 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Madrugada.JPG" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Madrugada.JPG" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Live: Sessões Sempre Nunca (2025)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -287,7 +335,7 @@
                 </div>
 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Flores%20Vivas.JPG" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Flores%20Vivas.JPG" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">EP: Flores Vivas (2025)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -299,7 +347,7 @@
                 </div>
 
                 <div class="flex gap-4 items-center group">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Fasc%C3%ADnio%20Frisson.jpg" alt="Capa" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Fasc%C3%ADnio%20Frisson.jpg" alt="Capa" loading="lazy" onclick="openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
                     <div class="flex-1 flex flex-col gap-1.5">
                         <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Single: Fascínio Frisson (2026)</span>
                         <div class="dash-audio-player flex items-center gap-2 px-2 py-1.5">
@@ -314,10 +362,10 @@
             <div id="fotos" class="flex flex-col gap-6 scroll-mt-32">
                 <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">GALERIA</h2>
                 <div class="grid grid-cols-2 gap-2">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.jpg" onclick="openGalleryModal(0)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.jpg" onclick="openGalleryModal(1)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.jpg" onclick="openGalleryModal(2)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura%20copiar.jpg" onclick="openGalleryModal(3)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.jpg" loading="lazy" onclick="openGalleryModal(0)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.jpg" loading="lazy" onclick="openGalleryModal(1)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.jpg" loading="lazy" onclick="openGalleryModal(2)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura%20copiar.jpg" loading="lazy" onclick="openGalleryModal(3)" class="w-full h-24 md:h-28 object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
                 </div>
                 <button onclick="openGalleryModal(0)" class="text-[var(--text-color)] font-bold text-[10px] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest border-b border-[var(--border-color)] hover:border-[var(--neon-pink)] pb-0.5 inline-flex items-center gap-1 w-fit mt-2">Ver Mais <i data-lucide="plus" class="w-3 h-3"></i></button>
             </div>
@@ -429,6 +477,7 @@
     </div>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
 
         // --- SISTEMA DE MUDANÇA DE TEMA ---
@@ -703,13 +752,27 @@
             resizeTimer = setTimeout(reinitLayout, 400);
         });
 
+        // Esconde a tela de carregamento e liberta o scroll
+        function hideLoader() {
+            const ls = document.getElementById('loading-screen');
+            if (!ls || ls.dataset.hidden) return;
+            ls.dataset.hidden = '1';
+            document.body.classList.remove('is-loading');
+            ls.classList.add('fade-out');
+            setTimeout(() => ls.remove(), 700);
+        }
+
         // Arranque Imediato
         document.fonts.ready.then(() => {
             updateLayoutCache();
             updateScrollAnim();
             initSandParticles();
-            initGallery(); // Iniciar o slider
+            initGallery();
+            hideLoader();
         });
+
+        // Fallback: garante que a tela some mesmo se as fontes demorarem
+        setTimeout(hideLoader, 8000);
 
         // Cliques e Navegações
         heroImg.addEventListener('click', () => {
@@ -857,7 +920,7 @@
                 closeModal('modal-image');
                 closeGalleryModal();
             }
-            
+
             const galleryModal = document.getElementById('modal-gallery');
             if (galleryModal && galleryModal.classList.contains('opacity-100')) {
                 if (e.key === 'ArrowRight') nextGalleryImage();
@@ -865,6 +928,7 @@
             }
         });
 
+    }); // DOMContentLoaded
     </script>
 </body>
 </html>
