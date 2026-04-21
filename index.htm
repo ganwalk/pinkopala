@@ -813,7 +813,7 @@
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 modal.classList.add('opacity-100', 'pointer-events-auto');
                 document.body.style.overflow = 'hidden'; 
-                lucide.createIcons(); // Garante que os ícones renderizam caso seja a 1ª vez
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
 
@@ -874,8 +874,8 @@
             if (modal) {
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 modal.classList.add('opacity-100', 'pointer-events-auto');
-                document.body.style.overflow = 'hidden'; 
-                lucide.createIcons(); 
+                document.body.style.overflow = 'hidden';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
 
@@ -934,6 +934,15 @@
                 if (e.key === 'ArrowLeft') prevGalleryImage();
             }
         });
+
+        // Expõe funções ao escopo global — necessário para onclick inline no HTML
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.openImageModal = openImageModal;
+        window.openGalleryModal = openGalleryModal;
+        window.closeGalleryModal = closeGalleryModal;
+        window.nextGalleryImage = nextGalleryImage;
+        window.prevGalleryImage = prevGalleryImage;
 
     }); // DOMContentLoaded
     </script>
