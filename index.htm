@@ -7,10 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="image" href="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" fetchpriority="high">
-    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        /* Garante fundo preto durante carregamento dos scripts bloqueantes */
+        html { background-color: #000000; }
+
         /* Sistema de Variáveis para Tema Claro / Escuro */
         :root {
             --neon-pink: #ff00aa;
@@ -478,7 +481,7 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
 
         // --- SISTEMA DE MUDANÇA DE TEMA ---
         const themeToggle = document.getElementById('theme-toggle');
@@ -762,13 +765,17 @@
             setTimeout(() => ls.remove(), 700);
         }
 
-        // Arranque Imediato
+        // Arranque Imediato — duplo RAF garante reflow após Tailwind injetar estilos
         document.fonts.ready.then(() => {
-            updateLayoutCache();
-            updateScrollAnim();
-            initSandParticles();
-            initGallery();
-            hideLoader();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    updateLayoutCache();
+                    updateScrollAnim();
+                    initSandParticles();
+                    initGallery();
+                    hideLoader();
+                });
+            });
         });
 
         // Fallback: garante que a tela some mesmo se as fontes demorarem
@@ -806,7 +813,7 @@
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 modal.classList.add('opacity-100', 'pointer-events-auto');
                 document.body.style.overflow = 'hidden'; 
-                lucide.createIcons(); // Garante que os ícones renderizam caso seja a 1ª vez
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
 
@@ -867,8 +874,8 @@
             if (modal) {
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 modal.classList.add('opacity-100', 'pointer-events-auto');
-                document.body.style.overflow = 'hidden'; 
-                lucide.createIcons(); 
+                document.body.style.overflow = 'hidden';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
         }
 
@@ -927,6 +934,15 @@
                 if (e.key === 'ArrowLeft') prevGalleryImage();
             }
         });
+
+        // Expõe funções ao escopo global — necessário para onclick inline no HTML
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.openImageModal = openImageModal;
+        window.openGalleryModal = openGalleryModal;
+        window.closeGalleryModal = closeGalleryModal;
+        window.nextGalleryImage = nextGalleryImage;
+        window.prevGalleryImage = prevGalleryImage;
 
     }); // DOMContentLoaded
     </script>
