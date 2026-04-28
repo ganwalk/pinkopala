@@ -937,6 +937,67 @@
         window.nextGalleryImage = nextGalleryImage;
         window.prevGalleryImage = prevGalleryImage;
 
+        // --- SISTEMA DE PRELOAD ROBUSTO ---
+        function startPreloader() {
+            const progressEl = document.getElementById('loading-progress');
+            const imageUrls = new Set();
+            
+            // Coleciona todas as imagens do HTML (capas, fotos do hero e dashboard)
+            document.querySelectorAll('img').forEach(img => {
+                if (img.src) imageUrls.add(img.src);
+            });
+            
+            // Adiciona imagens da galeria JS para garantir carregamento prévio
+            galleryImages.forEach(src => imageUrls.add(src));
+            
+            const urlsArray = Array.from(imageUrls);
+            const totalAssets = urlsArray.length + 1; // +1 para as fontes do sistema
+            let loadedAssets = 0;
+
+            function updateProgress() {
+                loadedAssets++;
+                const percentage = Math.floor((loadedAssets / totalAssets) * 100);
+                if (progressEl) progressEl.innerText = `${percentage}% CARREGADO`;
+                
+                if (loadedAssets >= totalAssets) {
+                    // Tudo 100% carregado na memória do browser!
+                    requestAnimationFrame(() => {
+                        updateLayoutCache();
+                        updateScrollAnim();
+                        initSandParticles();
+                        initGallery();
+                        setTimeout(hideLoader, 400); // Delay suave para o utilizador ler os "100%"
+                    });
+                }
+            }
+
+            // Aguarda o carregamento das fontes (Archivo Black, Space Grotesk)
+            document.fonts.ready.then(updateProgress);
+
+            // Aguarda o carregamento invisível de todas as imagens da página
+            if (urlsArray.length === 0) {
+                updateProgress();
+            } else {
+                urlsArray.forEach(src => {
+                    const img = new Image();
+                    img.onload = updateProgress;
+                    img.onerror = updateProgress; // Ignora se alguma foto falhar para não bloquear o site
+                    img.src = src;
+                });
+            }
+            
+            // Fallback: se a internet estiver muito lenta, força a entrada após 12 segundos
+            setTimeout(() => {
+                if(loadedAssets < totalAssets) {
+                    loadedAssets = totalAssets;
+                    updateProgress();
+                }
+            }, 12000);
+        }
+
+        // Inicia todo o processo global
+        startPreloader();
+
     }); // DOMContentLoaded
     </script>
 </body>
