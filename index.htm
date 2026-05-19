@@ -501,8 +501,9 @@
 
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            
+            isLightMode = document.body.classList.contains('light-mode');
+            const isLight = isLightMode;
+
             // Alterna o ícone sem ter de o re-renderizar do zero
             if (isLight) {
                 iconSun.classList.add('hidden');
@@ -532,6 +533,8 @@
         let sandParticles = [];
         let sandAnimId;
         let mouseX = -9999, mouseY = -9999;
+        let sandCtx = null;
+        let isLightMode = false;
         
         // Rastrear rato e toque para o efeito da areia
         window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
@@ -617,38 +620,41 @@
 
         // --- SISTEMA DE PARTÍCULAS DE AREIA ---
         function initSandParticles() {
-            const ctx = sandCanvas.getContext('2d', { willReadFrequently: true });
             const pinkText = document.getElementById('pink-text');
             const palaText = document.getElementById('pala-text');
-            
-            sandCanvas.width = window.innerWidth;
-            sandCanvas.height = window.innerHeight;
+
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            sandCanvas.width = W;
+            sandCanvas.height = H;
+
+            // Canvas offscreen para sampling — willReadFrequently isolado aqui
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = W;
+            offCanvas.height = H;
+            const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
 
             const style = window.getComputedStyle(pinkText);
-            ctx.font = `${style.fontWeight} ${style.fontSize} "Archivo Black", sans-serif`;
-            
-            // HERDAR O ESPAÇAMENTO (Resolve a fuga do "P" para a esquerda)
-            ctx.letterSpacing = style.letterSpacing; 
-            
-            ctx.fillStyle = '#ffffff'; 
-            ctx.textBaseline = 'middle';
-            // ALINHAMENTO À ESQUERDA (Ancora o início da palavra perfeitamente)
-            ctx.textAlign = 'left'; 
+            offCtx.font = `${style.fontWeight} ${style.fontSize} "Archivo Black", sans-serif`;
+            offCtx.letterSpacing = style.letterSpacing;
+            offCtx.fillStyle = '#ffffff';
+            offCtx.textBaseline = 'middle';
+            offCtx.textAlign = 'left';
 
             const pinkRect = pinkText.getBoundingClientRect();
             const palaRect = palaText.getBoundingClientRect();
 
-            // CÁLCULO DA MICRO-COMPENSAÇÃO DO CSS LEADING
             const fontSize = parseFloat(style.fontSize);
-            const yOffset = fontSize * 0.05; // Compensa o leading-[0.85] puxando o Canvas 5% para cima
-            const xOffset = fontSize * 0.01; // Ajuste fino mínimo para alinhar a extremidade
+            const yOffset = fontSize * 0.05;
+            const xOffset = fontSize * 0.01;
 
-            // Desenhar com os novos offsets e alinhamentos milimétricos
-            ctx.fillText(pinkText.innerText, pinkRect.left + xOffset, pinkRect.top + pinkRect.height/2 - yOffset);
-            ctx.fillText(palaText.innerText, palaRect.left + xOffset, palaRect.top + palaRect.height/2 - yOffset);
+            offCtx.fillText(pinkText.innerText, pinkRect.left + xOffset, pinkRect.top + pinkRect.height/2 - yOffset);
+            offCtx.fillText(palaText.innerText, palaRect.left + xOffset, palaRect.top + palaRect.height/2 - yOffset);
 
-            const imgData = ctx.getImageData(0, 0, sandCanvas.width, sandCanvas.height).data;
-            ctx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+            const imgData = offCtx.getImageData(0, 0, W, H).data;
+
+            // Contexto principal cacheado sem willReadFrequently (permite aceleração por GPU)
+            sandCtx = sandCanvas.getContext('2d');
 
             const gap = window.innerWidth < 768 ? 3 : 4; 
             sandParticles = [];
@@ -681,63 +687,70 @@
         }
 
         function animateSand() {
-            const ctx = sandCanvas.getContext('2d');
-            ctx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+            sandCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
 
-            const interactionRadius = window.innerWidth < 768 ? 40 : 60; 
-            const isLight = document.body.classList.contains('light-mode');
+            const interactionRadius = sandCanvas.width < 768 ? 40 : 60;
+            const interactionRadiusSq = interactionRadius * interactionRadius;
+            const baseColor = isLightMode ? '#000000' : '#ffffff';
 
+            // Fase 1: física de todas as partículas + separação em buckets por cor
+            const colored = [];
             for (let i = 0; i < sandParticles.length; i++) {
-                let p = sandParticles[i];
-                let dx = mouseX - p.x;
-                let dy = mouseY - p.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
+                const p = sandParticles[i];
 
-                if (distance < interactionRadius) {
-                    let force = (interactionRadius - distance) / interactionRadius;
-                    let angle = Math.atan2(dy, dx);
-                    p.vx -= Math.cos(angle) * force * (10 / p.mass);
-                    p.vy -= Math.sin(angle) * force * (10 / p.mass);
-                    
+                const dx = mouseX - p.x;
+                const dy = mouseY - p.y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < interactionRadiusSq) {
+                    const dist = Math.sqrt(distSq);
+                    const force = (interactionRadius - dist) / interactionRadius;
+                    const inv = 1 / dist;
+                    p.vx -= dx * inv * force * (10 / p.mass);
+                    p.vy -= dy * inv * force * (10 / p.mass);
                     p.colorFactor = Math.min(1, p.colorFactor + 0.15);
-                } else {
-                    if (p.colorFactor > 0) {
-                        p.colorFactor = Math.max(0, p.colorFactor - 0.015);
-                    }
+                } else if (p.colorFactor > 0) {
+                    p.colorFactor = Math.max(0, p.colorFactor - 0.015);
                 }
 
-                const distToOrigin = Math.sqrt((p.originX - p.x) ** 2 + (p.originY - p.y) ** 2);
-                const springK = distToOrigin > 8 ? 0.06 * p.mass : 0.003 * p.mass;
-                p.vx += (p.originX - p.x) * springK;
-                p.vy += (p.originY - p.y) * springK;
-
-                p.vx *= 0.88; 
-                p.vy *= 0.88;
+                const ox = p.originX - p.x;
+                const oy = p.originY - p.y;
+                const distOriginSq = ox * ox + oy * oy;
+                const springK = distOriginSq > 64 ? 0.045 * p.mass : 0.003 * p.mass;
+                p.vx = (p.vx + ox * springK) * 0.88;
+                p.vy = (p.vy + oy * springK) * 0.88;
                 p.x += p.vx;
                 p.y += p.vy;
 
-                // Transição dinâmica de cor entre a cor base (Preto/Branco) e o Rosa dependendo do Modo Atual
-                if (p.colorFactor > 0) {
-                    let r, g, b;
-                    if (isLight) {
-                        // De Preto (0,0,0) para Rosa (255,0,170)
-                        r = Math.floor(255 * p.colorFactor);
-                        g = 0;
-                        b = Math.floor(170 * p.colorFactor);
-                    } else {
-                        // De Branco (255,255,255) para Rosa (255,0,170)
-                        r = 255;
-                        g = Math.floor(255 - (255 * p.colorFactor));
-                        b = Math.floor(255 - (85 * p.colorFactor));
-                    }
-                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-                } else {
-                    // Cor de repouso consoante o modo
-                    ctx.fillStyle = isLight ? '#000000' : '#ffffff';
-                }
-
-                ctx.fillRect(p.x, p.y, p.size, p.size);
+                if (p.colorFactor > 0) colored.push(p);
             }
+
+            // Fase 2: desenhar todas as partículas na cor base numa única passagem
+            sandCtx.fillStyle = baseColor;
+            sandCtx.beginPath();
+            for (let i = 0; i < sandParticles.length; i++) {
+                const p = sandParticles[i];
+                if (p.colorFactor === 0) sandCtx.rect(p.x, p.y, p.size, p.size);
+            }
+            sandCtx.fill();
+
+            // Fase 3: partículas coloridas (só as próximas do rato — poucas)
+            for (let i = 0; i < colored.length; i++) {
+                const p = colored[i];
+                let r, g, b;
+                if (isLightMode) {
+                    r = Math.floor(255 * p.colorFactor);
+                    g = 0;
+                    b = Math.floor(170 * p.colorFactor);
+                } else {
+                    r = 255;
+                    g = Math.floor(255 * (1 - p.colorFactor));
+                    b = Math.floor(255 - 85 * p.colorFactor);
+                }
+                sandCtx.fillStyle = `rgb(${r},${g},${b})`;
+                sandCtx.fillRect(p.x, p.y, p.size, p.size);
+            }
+
             sandAnimId = requestAnimationFrame(animateSand);
         }
 
