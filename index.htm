@@ -758,22 +758,6 @@
             setTimeout(() => ls.remove(), 700);
         }
 
-        // Arranque Imediato — duplo RAF garante reflow após Tailwind injetar estilos
-        document.fonts.ready.then(() => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    updateLayoutCache();
-                    updateScrollAnim();
-                    initSandParticles();
-                    initGallery();
-                    hideLoader();
-                });
-            });
-        });
-
-        // Fallback: garante que a tela some mesmo se as fontes demorarem
-        setTimeout(hideLoader, 8000);
-
         // Cliques e Navegações
         heroImg.addEventListener('click', () => {
             const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
