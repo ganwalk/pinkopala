@@ -683,7 +683,20 @@
 
             const maxScroll = scrollSection.offsetHeight - winH;
             // Mobile: scroll-hero tem 100vh, sem animação de scroll
-            if (maxScroll <= 0) { isUpdating = false; return; }
+            if (maxScroll <= 0) {
+                // Garante que a foto fica no lugar do O de OPALA
+                if (baseO.width > 0) {
+                    const oSize = baseO.width * 0.88;
+                    heroImg.style.width = `${oSize}px`;
+                    heroImg.style.height = `${oSize}px`;
+                    heroImg.style.top = `${baseO.cy}px`;
+                    heroImg.style.left = `${baseO.cx}px`;
+                    heroImg.style.borderRadius = '50%';
+                    heroImg.style.transform = 'translate(-50%, -50%)';
+                }
+                isUpdating = false;
+                return;
+            }
             let progress = -rect.top / maxScroll;
             progress = Math.max(0, Math.min(1, progress));
 
@@ -896,6 +909,10 @@
             const ls = document.getElementById('loading-screen');
             if (!ls || ls.dataset.hidden) return;
             ls.dataset.hidden = '1';
+            // Mobile: revelar direto na tela de conteúdo; hero acessível só via scroll para cima
+            if (window.innerWidth < 768) {
+                document.getElementById('historia').scrollIntoView({ behavior: 'instant' });
+            }
             document.body.classList.remove('is-loading');
             ls.classList.add('fade-out');
             setTimeout(() => ls.remove(), 700);
