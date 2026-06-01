@@ -163,6 +163,19 @@
             font-weight: 300;
         }
 
+        #top-nav {
+            transition: background 0.5s ease, border-color 0.5s ease, backdrop-filter 0.5s ease;
+        }
+        #top-nav.nav-active {
+            background: rgba(var(--bg-rgb), 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        #nav-logo, #nav-links {
+            transition: opacity 0.4s ease;
+        }
+
         @media (max-width: 767px) {
             #discover-indicator { display: none !important; }
         }
@@ -179,24 +192,21 @@
         <span id="loading-percent">0%</span>
     </div>
 
-    <!-- Botão de Alternar Tema (Claro / Escuro) -->
-    <button id="theme-toggle" class="fixed top-4 right-4 md:top-6 md:right-6 z-[200] w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--panel-bg)] text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:border-[var(--neon-pink)] transition-all shadow-lg" title="Mudar Tema">
-        <span class="icon-sun block"><i data-lucide="sun" class="w-5 h-5"></i></span>
-        <span class="icon-moon hidden"><i data-lucide="moon" class="w-5 h-5"></i></span>
-    </button>
-
-    <!-- Navegação Superior (Surge na 3ª Dobra) -->
-    <nav id="top-nav" class="fixed top-0 w-full z-[100] bg-[rgba(var(--bg-rgb),0.95)] backdrop-blur-md border-b border-[var(--border-color)] p-4 md:p-6 flex justify-between items-center transition-all duration-500 transform -translate-y-full text-[var(--text-color)]">
-        <button id="nav-logo" class="text-xl md:text-2xl font-display tracking-tighter hover:text-[var(--neon-pink)] transition-colors focus:outline-none">
+    <!-- Navegação Superior — sempre visível, toggle integrado -->
+    <nav id="top-nav" class="fixed top-0 w-full z-[200] p-4 md:p-6 flex items-center text-[var(--text-color)]">
+        <button id="nav-logo" class="text-xl md:text-2xl font-display tracking-tighter hover:text-[var(--neon-pink)] focus:outline-none opacity-0 pointer-events-none" style="transition:opacity 0.4s ease">
             PINK OPALA
         </button>
-        <!-- Adicionado pr-10 para evitar sobreposição com o botão de tema no mobile -->
-        <ul class="flex space-x-3 sm:space-x-4 md:space-x-8 text-[9px] md:text-sm font-bold tracking-widest font-mono pr-10 md:pr-0 md:mr-12">
+        <ul id="nav-links" class="flex space-x-3 sm:space-x-4 md:space-x-8 text-[9px] md:text-sm font-bold tracking-widest font-mono ml-auto mr-3 md:mr-5 opacity-0 pointer-events-none">
             <li class="hidden sm:block"><a href="#historia" class="nav-link">HISTÓRIA</a></li>
             <li><a href="#discografia" class="nav-link">DISCOGRAFIA</a></li>
             <li><a href="#fotos" class="nav-link">GALERIA</a></li>
             <li><a href="#contacto" class="nav-link">CONTATO</a></li>
         </ul>
+        <button id="theme-toggle" class="flex-shrink-0 w-10 h-10 rounded-full border border-[var(--border-color)] flex items-center justify-center bg-[var(--panel-bg)] text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:border-[var(--neon-pink)] transition-all shadow-lg" title="Mudar Tema">
+            <span class="icon-sun block"><i data-lucide="sun" class="w-5 h-5"></i></span>
+            <span class="icon-moon hidden"><i data-lucide="moon" class="w-5 h-5"></i></span>
+        </button>
     </nav>
 
     <section id="hero" class="scroll-hero">
@@ -211,16 +221,16 @@
                     <span id="pala-text" class="transition-opacity duration-500 inline-block">OPALA</span>
                 </h1>
 
-                <div id="discover-indicator" class="absolute top-[100%] pt-2 sm:pt-1 flex flex-col items-center opacity-70 cursor-pointer transition-opacity hover:opacity-100" title="Clique para explorar">
-                    <i data-lucide="arrow-up" class="w-5 h-5 sm:w-6 sm:h-6 text-[var(--neon-pink)] animate-bounce mb-1 sm:mb-2"></i>
-                    <span id="discover-text" class="text-[10px] sm:text-xs text-[var(--neon-pink)] uppercase tracking-widest font-mono min-w-[150px] text-center transition-all">NOS CONHEÇA</span>
+                <div id="discover-indicator" class="absolute top-[100%] pt-2 sm:pt-1 flex flex-col items-center opacity-0 cursor-pointer transition-opacity duration-300" title="Clique para explorar">
+                    <i data-lucide="arrow-down" class="w-5 h-5 sm:w-6 sm:h-6 text-[var(--neon-pink)] animate-bounce mb-1 sm:mb-2"></i>
+                    <span id="discover-text" class="text-[10px] sm:text-xs text-[var(--neon-pink)] uppercase tracking-widest font-mono text-center">NOS CONHEÇA</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- NOVO DASHBOARD APÓS O SCROLL -->
-    <main class="dash-container px-4 md:px-8 pt-32 pb-20 mt-24 md:mt-40 relative z-10 bg-[var(--bg-color)] transition-colors duration-500">
+    <main class="dash-container px-4 md:px-8 pt-24 md:pt-28 pb-20 relative z-10 bg-[var(--bg-color)] transition-colors duration-500">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             
             <div id="historia" class="flex flex-col gap-6 scroll-mt-32">
@@ -575,35 +585,25 @@
             // no-op: kept for resize/orientationchange hooks
         }
 
+        function showNav() {
+            topNav.classList.add('nav-active');
+            document.getElementById('nav-logo').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('nav-links').classList.remove('opacity-0', 'pointer-events-none');
+        }
+        function hideNav() {
+            topNav.classList.remove('nav-active');
+            document.getElementById('nav-logo').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('nav-links').classList.add('opacity-0', 'pointer-events-none');
+        }
+
         function updateScrollAnim() {
             if (!scrollSection || !introContent) return;
 
-            const rect = scrollSection.getBoundingClientRect();
-            const winH = window.innerHeight;
-            const winW = window.innerWidth;
-            const isMobile = winW < 768;
-
-            const maxScroll = scrollSection.offsetHeight - winH;
-            // Mobile: scroll-hero tem 100vh, sem animação de scroll
-            if (maxScroll <= 0) { isUpdating = false; return; }
-            let progress = -rect.top / maxScroll;
-            progress = Math.max(0, Math.min(1, progress));
-
-            const introOpacity = 1 - (progress * 3);
-            const translateY = progress * -50;
-            
-            introContent.style.opacity = Math.max(0, introOpacity);
-            introContent.style.transform = `translateY(${translateY}px)`;
-            sandCanvas.style.opacity = Math.max(0, introOpacity);
-            sandCanvas.style.transform = `translateY(${translateY}px)`;
-
-            if (topNav) {
-                const dashRect = document.querySelector('.dash-container').getBoundingClientRect();
-                if (dashRect.top <= 100) {
-                    topNav.classList.remove('-translate-y-full');
-                } else {
-                    topNav.classList.add('-translate-y-full');
-                }
+            const dashRect = document.querySelector('.dash-container').getBoundingClientRect();
+            if (dashRect.top <= 80) {
+                showNav();
+            } else {
+                hideNav();
             }
 
             isUpdating = false;
@@ -784,28 +784,43 @@
         }
 
         // Cliques e Navegações
+        const dashMain = document.querySelector('.dash-container');
+
         function scrollToExplore() {
-            if (window.innerWidth < 768) {
-                document.getElementById('historia').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
-                window.scrollTo({ top: targetY, behavior: 'smooth' });
-            }
+            if (dashMain.dataset.animating) return;
+            dashMain.dataset.animating = '1';
+
+            // Scroll body past hero instantly so main sits at viewport top
+            window.scrollTo({ top: scrollSection.offsetHeight, behavior: 'instant' });
+
+            // Push main below viewport, then animate up
+            dashMain.style.transition = 'none';
+            dashMain.style.transform = 'translateY(100vh)';
+
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                dashMain.style.transition = 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
+                dashMain.style.transform = 'translateY(0)';
+
+                dashMain.addEventListener('transitionend', () => {
+                    delete dashMain.dataset.animating;
+                    dashMain.style.transition = '';
+                    dashMain.style.transform = '';
+                    showNav();
+                }, { once: true });
+            }));
         }
+
+        // Hover no título mostra o indicador "NOS CONHEÇA"
+        const discoverIndicator = document.getElementById('discover-indicator');
+        introContent.addEventListener('mouseenter', () => {
+            if (discoverIndicator) discoverIndicator.style.opacity = '1';
+        });
+        introContent.addEventListener('mouseleave', () => {
+            if (discoverIndicator) discoverIndicator.style.opacity = '0';
+        });
 
         document.getElementById('main-title').addEventListener('click', scrollToExplore);
-
-        document.getElementById('discover-indicator')?.addEventListener('click', scrollToExplore);
-
-        const discoverText = document.getElementById('discover-text');
-        if (discoverText) {
-            setInterval(() => {
-                setTimeout(() => discoverText.innerText = 'QUEM?', 0);
-                setTimeout(() => discoverText.innerText = 'WHO?', 500);
-                setTimeout(() => discoverText.innerText = 'GET TO KNOW US', 1000);
-                setTimeout(() => discoverText.innerText = 'NOS CONHEÇA', 2000);
-            }, 6000);
-        }
+        discoverIndicator?.addEventListener('click', scrollToExplore);
 
 
         // --- SISTEMA DE MODAIS (Popups) ---
