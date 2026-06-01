@@ -6,7 +6,7 @@
     <title>Pink Opala | Oficial</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="image" href="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" fetchpriority="high">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
@@ -95,28 +95,6 @@
             position: relative;
         }
 
-        .hero-img-anim {
-            position: absolute;
-            left: 50%;
-            top: 30%;
-            transform: translate(-50%, -50%);
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            z-index: 20;
-            will-change: width, height, top, left, border-radius;
-        }
-        .hero-img-anim img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(100%);
-            transition: filter 0.5s ease;
-        }
-        .hero-img-anim:hover img {
-            filter: grayscale(0%);
-        }
 
         #discover-indicator {
             left: 50%;
@@ -257,17 +235,11 @@
             <!-- Canvas para o Efeito de Partículas (Areia) -->
             <canvas id="sand-canvas" class="absolute inset-0 w-full h-full z-[12]" style="pointer-events: none;"></canvas>
 
-            <!-- Imagem animada -->
-            <div class="hero-img-anim opacity-0 transition-opacity duration-500 cursor-pointer" id="hero-img-anim" title="Clique para explorar">
-                <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.jpg" alt="Banda Pink Opala">
-            </div>
-
             <div class="intro-content w-full" id="intro-content">
                 <!-- Usado text-[21vw] e whitespace-nowrap para garantir que a palavra OPALA nunca se quebra no telemóvel -->
-                <h1 id="main-title" class="text-[21vw] sm:text-[9rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] tracking-tighter whitespace-nowrap title-glow inline-block relative">
+                <h1 id="main-title" class="text-[21vw] sm:text-[9rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] tracking-tighter whitespace-nowrap title-glow inline-block relative cursor-pointer" title="Clique para explorar">
                     <span id="pink-text" class="transition-opacity duration-500 inline-block">PINK</span><br>
-                    <!-- Ajuste fino de alinhamento: movido para a DIREITA (left-[0.15em]) e com margem ajustada (mr-[0.11em]) -->
-                    <span id="o-placeholder" class="text-transparent select-none relative inline-block mr-[0.11em] top-[-0.1em] left-[0.15em]">O</span><span id="pala-text" class="transition-opacity duration-500 inline-block">PALA</span>
+                    <span id="pala-text" class="transition-opacity duration-500 inline-block">OPALA</span>
                 </h1>
                 
                 <div id="discover-indicator" class="absolute top-[100%] pt-2 sm:pt-1 flex flex-col items-center opacity-70 cursor-pointer transition-opacity hover:opacity-100" title="Clique para explorar">
@@ -626,16 +598,13 @@
 
         // --- INTERATIVIDADE E SCROLL ---
         const scrollSection = document.querySelector('.scroll-hero');
-        const heroImg = document.getElementById('hero-img-anim');
         const introContent = document.getElementById('intro-content');
         const sobreReveal = document.getElementById('sobre-reveal');
-        const oPlaceholder = document.getElementById('o-placeholder');
         const stickyHero = document.querySelector('.sticky-hero');
         const sandCanvas = document.getElementById('sand-canvas');
         const topNav = document.getElementById('top-nav');
-        
+
         let isUpdating = false;
-        let baseO = { width: 0, height: 0, cx: 0, cy: 0 };
         let sandParticles = [];
         let sandAnimId;
         let mouseX = -9999, mouseY = -9999;
@@ -649,32 +618,11 @@
         window.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; });
 
         function updateLayoutCache() {
-            if (!oPlaceholder || !stickyHero || !introContent) return;
-            const prevTransform = introContent.style.transform;
-            introContent.style.transform = 'none';
-            const oRect = oPlaceholder.getBoundingClientRect();
-            const stickyRect = stickyHero.getBoundingClientRect();
-            const introRect = introContent.getBoundingClientRect();
-            
-            baseO = {
-                width: oRect.width, height: oRect.height,
-                cx: (oRect.left - stickyRect.left) + oRect.width / 2,
-                cy: (oRect.top - stickyRect.top) + oRect.height / 2
-            };
-
-            const discoverIndicator = document.getElementById('discover-indicator');
-            if (discoverIndicator) {
-                const relativeCx = (oRect.left - introRect.left) + (oRect.width / 2);
-                discoverIndicator.style.left = `${relativeCx}px`;
-                discoverIndicator.style.transform = 'translateX(-50%)';
-            }
-
-            introContent.style.transform = prevTransform;
-            if (baseO.width > 0) heroImg.classList.remove('opacity-0');
+            // no-op: kept for resize/orientationchange hooks
         }
 
         function updateScrollAnim() {
-            if (!scrollSection || !heroImg || !introContent || !sobreReveal) return;
+            if (!scrollSection || !introContent || !sobreReveal) return;
 
             const rect = scrollSection.getBoundingClientRect();
             const winH = window.innerHeight;
@@ -686,21 +634,6 @@
             if (maxScroll <= 0) { isUpdating = false; return; }
             let progress = -rect.top / maxScroll;
             progress = Math.max(0, Math.min(1, progress));
-
-            const oSize = baseO.width ? baseO.width * 0.88 : (isMobile ? 55 : 100);
-            const targetW = isMobile ? winW : winW / 2;
-            const targetH = isMobile ? winH / 2 : winH;
-
-            const curW = oSize + (targetW - oSize) * progress;
-            const curH = oSize + (targetH - oSize) * progress;
-            const curTop = (baseO.cy || winH * 0.4) + ((isMobile ? targetH / 2 : winH / 2) - (baseO.cy || winH * 0.4)) * progress;
-            const curLeft = (baseO.cx || winW * 0.5) + ((isMobile ? winW / 2 : targetW / 2) - (baseO.cx || winW * 0.5)) * progress;
-            
-            heroImg.style.width = `${curW}px`;
-            heroImg.style.height = `${curH}px`;
-            heroImg.style.top = `${curTop}px`;
-            heroImg.style.left = `${curLeft}px`;
-            heroImg.style.borderRadius = `${50 - (50 * progress)}%`;
 
             const introOpacity = 1 - (progress * 3);
             const translateY = progress * -50;
@@ -870,7 +803,6 @@
         });
 
         function reinitLayout() {
-            updateLayoutCache();
             if (!isUpdating) { window.requestAnimationFrame(updateScrollAnim); isUpdating = true; }
             document.getElementById('pink-text').style.opacity = '1';
             document.getElementById('pala-text').style.opacity = '1';
@@ -902,23 +834,18 @@
         }
 
         // Cliques e Navegações
-        heroImg.addEventListener('click', () => {
+        function scrollToExplore() {
             if (window.innerWidth < 768) {
                 document.getElementById('historia').scrollIntoView({ behavior: 'smooth' });
             } else {
                 const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
                 window.scrollTo({ top: targetY, behavior: 'smooth' });
             }
-        });
+        }
 
-        document.getElementById('discover-indicator')?.addEventListener('click', () => {
-            if (window.innerWidth < 768) {
-                document.getElementById('historia').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                const targetY = scrollSection.offsetTop + scrollSection.offsetHeight - window.innerHeight;
-                window.scrollTo({ top: targetY, behavior: 'smooth' });
-            }
-        });
+        document.getElementById('main-title').addEventListener('click', scrollToExplore);
+
+        document.getElementById('discover-indicator')?.addEventListener('click', scrollToExplore);
 
         const discoverText = document.getElementById('discover-text');
         if (discoverText) {
