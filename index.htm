@@ -355,39 +355,47 @@
                     </div>
                 </form>
 
-                <h2 id="links" class="text-4xl font-display tracking-tight mt-8 scroll-mt-32 text-[var(--text-color)]">LINKS E APOIO</h2>
-
-                <!-- Streaming -->
-                <div class="mt-4 border-t border-[var(--border-color)]">
-                    <span class="text-[9px] font-bold font-mono tracking-[0.2em] text-[var(--muted-color)] block pt-3 pb-2 uppercase">Streaming</span>
-                    <ul class="divide-y divide-[var(--border-color)]">
-                        <li><a href="https://www.youtube.com/@PinkOpala" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">YouTube <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://open.spotify.com/intl-pt/artist/73KiHAF1Xe5cP6H3pZsGXy?si=Zg-3b95BQQez3qeEypZB7A" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Spotify <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://pinkopala.bandcamp.com/" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Bandcamp <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://music.apple.com/br/artist/pink-opala/1469083997" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Apple Music <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://tidal.com/artist/16069472" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Tidal <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://www.deezer.com/br/artist/67903652" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Deezer <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                    </ul>
-                </div>
-
-                <!-- Socials -->
-                <div class="mt-4 border-t border-[var(--border-color)]">
-                    <span class="text-[9px] font-bold font-mono tracking-[0.2em] text-[var(--muted-color)] block pt-3 pb-2 uppercase">Socials</span>
-                    <ul class="divide-y divide-[var(--border-color)]">
-                        <li><a href="https://www.instagram.com/pinkopala/" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Instagram <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://www.facebook.com/pinkopala" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">Facebook <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                        <li><a href="https://www.tiktok.com/@pink.opala" target="_blank" class="flex items-center justify-between py-2 text-xs font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] hover:pl-1 transition-all">TikTok <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-40"></i></a></li>
-                    </ul>
-                </div>
-
-                <!-- PIX -->
-                <div class="mt-4 border border-[var(--border-color)] rounded-sm p-4 bg-[var(--panel-bg)]">
-                    <span class="text-[9px] font-bold font-mono tracking-[0.2em] text-[var(--muted-color)] block mb-3 uppercase">Apoie — Chave PIX</span>
-                    <p class="text-sm font-mono font-bold text-[var(--text-color)] tracking-wide mb-3">47.716.900/0001-01</p>
-                    <p class="text-[10px] font-mono text-[var(--muted-color)] mb-3">CNPJ — Pink Opala</p>
-                    <button type="button" onclick="const temp = document.createElement('textarea'); temp.value = '47.716.900/0001-01'; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp); this.innerHTML = '<i data-lucide=\'check\' class=\'w-3 h-3\'></i> COPIADO!'; lucide.createIcons();" class="w-full border border-[var(--border-color)] text-[var(--text-color)] font-bold px-3 py-2 rounded-sm text-[10px] hover:border-[var(--neon-pink)] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest flex items-center justify-center gap-2">
-                        <i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX
-                    </button>
+                <h2 id="links" class="text-4xl font-display tracking-tight mt-6 scroll-mt-32 text-[var(--text-color)]">LINKS E APOIO</h2>
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    <!-- Streaming -->
+                    <div class="border-t border-[var(--border-color)] pt-3">
+                        <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Streaming</span>
+                        <ul class="space-y-1.5">
+                            <li><a href="https://www.youtube.com/@PinkOpala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>YouTube</a></li>
+                            <li><a href="https://open.spotify.com/intl-pt/artist/73KiHAF1Xe5cP6H3pZsGXy?si=Zg-3b95BQQez3qeEypZB7A" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Spotify</a></li>
+                            <li><a href="https://pinkopala.bandcamp.com/" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Bandcamp</a></li>
+                            <li><a href="https://music.apple.com/br/artist/pink-opala/1469083997" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Apple Music</a></li>
+                            <li><a href="https://tidal.com/artist/16069472" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Tidal</a></li>
+                            <li><a href="https://www.deezer.com/br/artist/67903652" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Deezer</a></li>
+                        </ul>
+                    </div>
+                    <!-- Socials -->
+                    <div class="border-t border-[var(--border-color)] pt-3">
+                        <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Socials</span>
+                        <ul class="space-y-1.5">
+                            <li><a href="https://www.instagram.com/pinkopala/" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Instagram</a></li>
+                            <li><a href="https://www.facebook.com/pinkopala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Facebook</a></li>
+                            <li><a href="https://www.tiktok.com/@pink.opala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>TikTok</a></li>
+                        </ul>
+                    </div>
+                    <!-- PIX -->
+                    <div class="border-t border-[var(--border-color)] pt-3">
+                        <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Apoie</span>
+                        <p class="text-[9px] font-mono text-[var(--muted-color)] mb-1">Chave PIX (CNPJ)</p>
+                        <p class="text-[10px] font-mono font-bold text-[var(--text-color)] leading-snug mb-3">47.716.900/<br>0001-01</p>
+                        <button type="button" onclick="const temp = document.createElement('textarea'); temp.value = '47.716.900/0001-01'; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp); this.innerHTML = '<i data-lucide=\'check\' class=\'w-3 h-3\'></i> OK'; lucide.createIcons();" class="border border-[var(--border-color)] text-[var(--text-color)] font-bold px-2 py-1.5 rounded-sm text-[9px] hover:border-[var(--neon-pink)] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest flex items-center gap-1.5 w-full justify-center">
+                            <i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
