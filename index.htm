@@ -73,7 +73,8 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
 
         .scroll-hero {
-            height: 160vh;
+            height: 100vh;
+            height: 100dvh;
             position: relative;
         }
         .sticky-hero {
@@ -162,9 +163,7 @@
             font-weight: 300;
         }
 
-        /* Mobile: hero ocupa exatamente 1 tela, sem scroll-animation */
         @media (max-width: 767px) {
-            .scroll-hero { height: 100vh; height: 100dvh; }
             #discover-indicator { display: none !important; }
         }
     </style>
