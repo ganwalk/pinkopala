@@ -75,7 +75,9 @@
         .scroll-hero {
             height: 100vh;
             height: 100dvh;
-            position: relative;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
         .sticky-hero {
             position: sticky;
@@ -328,7 +330,7 @@
                 <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">GALERIA</h2>
                 <div class="grid grid-cols-2 gap-2">
                     <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.jpg" loading="lazy" onclick="openGalleryModal(0)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
-                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.jpg" loading="lazy" onclick="openGalleryModal(1)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura%20copiar.jpg" loading="lazy" onclick="openGalleryModal(1)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
                     <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.jpg" loading="lazy" onclick="openGalleryModal(2)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
                     <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(1)%20copiar.jpg" loading="lazy" onclick="openGalleryModal(3)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
                 </div>
@@ -790,19 +792,16 @@
             if (dashMain.dataset.animating) return;
             dashMain.dataset.animating = '1';
 
-            // Scroll body past hero instantly so main sits at viewport top
-            window.scrollTo({ top: scrollSection.offsetHeight, behavior: 'instant' });
-
-            // Push main below viewport, then animate up
-            dashMain.style.transition = 'none';
-            dashMain.style.transform = 'translateY(100vh)';
-
+            // Hero is sticky (z:1); main (z:10) slides up over it via translateY
+            // At scrollY=0, main is naturally 100vh below viewport → -100vh brings it to top
             requestAnimationFrame(() => requestAnimationFrame(() => {
                 dashMain.style.transition = 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
-                dashMain.style.transform = 'translateY(0)';
+                dashMain.style.transform = 'translateY(-100vh)';
 
                 dashMain.addEventListener('transitionend', () => {
                     delete dashMain.dataset.animating;
+                    // Scroll past hero and restore normal flow
+                    window.scrollTo({ top: scrollSection.offsetHeight, behavior: 'instant' });
                     dashMain.style.transition = '';
                     dashMain.style.transform = '';
                     showNav();
@@ -864,12 +863,12 @@
         // --- SISTEMA DA GALERIA ---
         const galleryImages = [
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.jpg",
-            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.jpg",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(1)%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(2)%20copiar.jpg",
-            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura%20copiar.jpg",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(1)%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(2)%20copiar.jpg",
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(3)%20copiar.jpg",
