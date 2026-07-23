@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pink Opala | Oficial</title>
+    <meta name="description" content="Site oficial da Pink Opala — duo de indie pop de Goiânia (GO). Discografia, galeria, história e contato.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest" defer></script>
@@ -105,7 +107,9 @@
         }
 
 
-        .dash-container { max-width: 1600px; margin: 0 auto; }
+        /* Empilhamento crítico definido aqui (não depende do CDN do Tailwind):
+           o dashboard precisa pintar acima do hero sticky para receber cliques */
+        .dash-container { max-width: 1600px; margin: 0 auto; position: relative; z-index: 10; background-color: var(--bg-color); }
 
         /* Ocultar barra de rolagem nas miniaturas da galeria */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -331,13 +335,13 @@
 
             <div id="contacto" class="flex flex-col gap-6 relative scroll-mt-32">
                 <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">CONTATO</h2>
-                <form onsubmit="event.preventDefault();" class="flex flex-col gap-3">
+                <form data-contact-form class="flex flex-col gap-3">
                     <div class="flex gap-3">
-                        <input type="text" placeholder="Nome" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
-                        <input type="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                        <input type="text" name="nome" placeholder="Nome" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                        <input type="email" name="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
                     </div>
-                    <textarea placeholder="Mensagem" rows="3" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
-                    
+                    <textarea name="mensagem" placeholder="Mensagem" rows="3" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
+
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-3 items-start sm:items-center mt-2">
                         <button type="submit" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Enviar</button>
                         
@@ -384,7 +388,7 @@
                         <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Apoie</span>
                         <p class="text-[9px] font-mono text-[var(--muted-color)] mb-1">Chave PIX (CNPJ)</p>
                         <p class="text-[10px] font-mono font-bold text-[var(--text-color)] leading-snug mb-3">47.716.900/<br>0001-01</p>
-                        <button type="button" onclick="const temp = document.createElement('textarea'); temp.value = '47.716.900/0001-01'; document.body.appendChild(temp); temp.select(); document.execCommand('copy'); document.body.removeChild(temp); this.innerHTML = '<i data-lucide=\'check\' class=\'w-3 h-3\'></i> OK'; lucide.createIcons();" class="border border-[var(--border-color)] text-[var(--text-color)] font-bold px-2 py-1.5 rounded-sm text-[9px] hover:border-[var(--neon-pink)] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest flex items-center gap-1.5 w-full justify-center">
+                        <button type="button" onclick="copyPix(this, 'OK')" class="border border-[var(--border-color)] text-[var(--text-color)] font-bold px-2 py-1.5 rounded-sm text-[9px] hover:border-[var(--neon-pink)] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest flex items-center gap-1.5 w-full justify-center">
                             <i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX
                         </button>
                     </div>
@@ -496,12 +500,12 @@
         <div class="bg-[var(--panel-bg)] border border-[var(--border-color)] p-6 md:p-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-sm relative shadow-2xl transition-colors duration-500">
             <button onclick="closeModal('modal-contato')" class="absolute top-4 right-4 text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
             <h2 class="text-3xl font-display tracking-tight text-[var(--text-color)] mb-6">CONTATO</h2>
-            <form onsubmit="event.preventDefault();" class="flex flex-col gap-3 mb-8">
+            <form data-contact-form class="flex flex-col gap-3 mb-8">
                 <div class="flex gap-3">
-                    <input type="text" placeholder="Nome" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
-                    <input type="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                    <input type="text" name="nome" placeholder="Nome" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                    <input type="email" name="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
                 </div>
-                <textarea placeholder="Mensagem" rows="3" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
+                <textarea name="mensagem" placeholder="Mensagem" rows="3" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
                 <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center mt-1">
                     <button type="submit" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Enviar</button>
                     <div class="text-[10px] font-mono text-[var(--muted-color)] sm:ml-auto leading-tight transition-colors">+55 (62) 9 8454 - 8326<br>contato@pinkopala.com<br>Goiânia - Goiás, Brasil.</div>
@@ -531,7 +535,7 @@
                     <span class="text-xs font-bold font-mono block mb-3 text-[var(--text-color)]">APOIE</span>
                     <div class="flex flex-col gap-2 text-xs font-mono text-[var(--muted-color)]">
                         <p>Chave PIX (CNPJ):<br><span class="text-[var(--text-color)]">47.716.900/0001-01</span></p>
-                        <button type="button" onclick="const temp=document.createElement('textarea');temp.value='47.716.900/0001-01';document.body.appendChild(temp);temp.select();document.execCommand('copy');document.body.removeChild(temp);this.innerHTML='<i data-lucide=\'check\' class=\'w-3 h-3\'></i> COPIADO!';lucide.createIcons();" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-3 py-1.5 rounded-sm text-[10px] hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-1 w-fit"><i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX</button>
+                        <button type="button" onclick="copyPix(this, 'COPIADO!')" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-3 py-1.5 rounded-sm text-[10px] hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-1 w-fit"><i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX</button>
                     </div>
                 </div>
             </div>
@@ -541,6 +545,9 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Decodificação de imagens fora da thread principal (evita jank ao rolar)
+        document.querySelectorAll('img').forEach(img => { img.decoding = 'async'; });
 
         // --- SISTEMA DE MUDANÇA DE TEMA ---
         const themeToggle = document.getElementById('theme-toggle');
@@ -592,10 +599,6 @@
         window.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; if (!prefersReducedMotion) startSand(); }, { passive: true });
         window.addEventListener('mouseout', () => { mouseX = -9999; mouseY = -9999; if (!prefersReducedMotion) startSand(); });
         window.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; if (!prefersReducedMotion) startSand(); });
-
-        function updateLayoutCache() {
-            // no-op: kept for resize/orientationchange hooks
-        }
 
         function showNav() {
             topNav.classList.add('nav-active');
@@ -808,7 +811,6 @@
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
-            updateLayoutCache();
             if (!isUpdating) { window.requestAnimationFrame(updateScrollAnim); isUpdating = true; }
             resizeTimer = setTimeout(reinitLayout, 300);
         });
@@ -873,6 +875,8 @@
         const discoverText = document.getElementById('discover-text');
         if (discoverText) {
             setInterval(() => {
+                // Não troca texto com a aba oculta ou o hero fora de vista
+                if (document.hidden || !heroVisible) return;
                 setTimeout(() => discoverText.innerText = 'QUEM?', 0);
                 setTimeout(() => discoverText.innerText = 'WHO?', 500);
                 setTimeout(() => discoverText.innerText = 'GET TO KNOW US', 1000);
@@ -924,10 +928,12 @@
             "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(4)%20copiar.jpg"
         ];
         let currentGalleryIndex = 0;
+        let galleryReady = false;
 
         function initGallery() {
             const thumbContainer = document.getElementById('gallery-thumbnails');
             if(!thumbContainer) return;
+            galleryReady = true;
             thumbContainer.innerHTML = '';
             galleryImages.forEach((src, index) => {
                 const img = document.createElement('img');
@@ -943,6 +949,8 @@
         }
 
         function openGalleryModal(index = 0) {
+            // Miniaturas só são criadas (e baixadas) na primeira abertura
+            if (!galleryReady) initGallery();
             currentGalleryIndex = index;
             changeGalleryImage(index);
             const modal = document.getElementById('modal-gallery');
@@ -1038,7 +1046,68 @@
             });
         });
 
+        // --- FLUXO DE E-MAIL (mailto) ---
+        // Redige o e-mail com os dados dos campos e abre o cliente de e-mail
+        const CONTACT_EMAIL = 'contato@pinkopala.com';
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const nome = (form.elements.nome.value || '').trim();
+            const email = (form.elements.email.value || '').trim();
+            const mensagem = (form.elements.mensagem.value || '').trim();
+
+            const subject = nome ? `Contato pelo site — ${nome}` : 'Contato pelo site';
+            const lines = [];
+            if (nome) lines.push(`Nome: ${nome}`);
+            if (email) lines.push(`Email: ${email}`);
+            if (lines.length) lines.push('');
+            lines.push(mensagem);
+
+            window.location.href = `mailto:${CONTACT_EMAIL}` +
+                `?subject=${encodeURIComponent(subject)}` +
+                `&body=${encodeURIComponent(lines.join('\n'))}`;
+
+            // Feedback visual no botão enquanto o cliente de e-mail abre
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn && !btn.dataset.original) {
+                btn.dataset.original = btn.textContent;
+                btn.textContent = 'Abrindo e-mail…';
+                setTimeout(() => {
+                    btn.textContent = btn.dataset.original;
+                    delete btn.dataset.original;
+                }, 2500);
+            }
+        }
+        document.querySelectorAll('form[data-contact-form]').forEach(form => {
+            form.addEventListener('submit', handleContactSubmit);
+        });
+
+        // --- COPIAR CHAVE PIX ---
+        function copyPix(btn, label) {
+            const pix = '47.716.900/0001-01';
+            const done = () => {
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> ${label}`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            };
+            const legacy = () => {
+                const temp = document.createElement('textarea');
+                temp.value = pix;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+                done();
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pix).then(done).catch(legacy);
+            } else {
+                legacy();
+            }
+        }
+
         // Expõe funções ao escopo global — necessário para onclick inline no HTML
+        window.copyPix = copyPix;
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.openImageModal = openImageModal;
@@ -1047,63 +1116,58 @@
         window.nextGalleryImage = nextGalleryImage;
         window.prevGalleryImage = prevGalleryImage;
 
-        // --- SISTEMA DE PRELOAD ROBUSTO ---
+        // --- PRELOADER ENXUTO ---
+        // Bloqueia a entrada apenas no essencial para o primeiro paint: as fontes
+        // (necessárias para desenhar as partículas do hero). Todas as imagens
+        // carregam depois, em segundo plano, sem atrasar o utilizador.
         function startPreloader() {
-            const progressEl = document.getElementById('loading-progress');
-            const imageUrls = new Set();
-            
-            // Coleciona todas as imagens do HTML (capas, fotos do hero e dashboard)
-            document.querySelectorAll('img').forEach(img => {
-                if (img.src) imageUrls.add(img.src);
-            });
-            
-            // Adiciona imagens da galeria JS para garantir carregamento prévio
-            galleryImages.forEach(src => imageUrls.add(src));
-            
-            const urlsArray = Array.from(imageUrls);
-            const totalAssets = urlsArray.length + 1; // +1 para as fontes do sistema
-            let loadedAssets = 0;
+            const title = document.querySelector('.loading-title');
+            let entered = false;
 
-            function updateProgress() {
-                loadedAssets++;
-                const percentage = Math.floor((loadedAssets / totalAssets) * 100);
-                const title = document.querySelector('.loading-title');
-                if (title) title.style.setProperty('--fill', `${percentage}%`);
-                
-                if (loadedAssets >= totalAssets) {
-                    // Tudo 100% carregado na memória do browser!
-                    requestAnimationFrame(() => {
-                        updateLayoutCache();
-                        updateScrollAnim();
-                        initSandParticles();
-                        initGallery();
-                        setTimeout(hideLoader, 400); // Delay suave para o utilizador ler os "100%"
-                    });
-                }
+            function setFill(pct) {
+                if (title) title.style.setProperty('--fill', `${pct}%`);
             }
 
-            // Aguarda o carregamento das fontes (Archivo Black, Space Grotesk)
-            document.fonts.ready.then(updateProgress);
-
-            // Aguarda o carregamento invisível de todas as imagens da página
-            if (urlsArray.length === 0) {
-                updateProgress();
-            } else {
-                urlsArray.forEach(src => {
-                    const img = new Image();
-                    img.onload = updateProgress;
-                    img.onerror = updateProgress; // Ignora se alguma foto falhar para não bloquear o site
-                    img.src = src;
+            function enterSite() {
+                if (entered) return;
+                entered = true;
+                setFill(100);
+                requestAnimationFrame(() => {
+                    updateScrollAnim();
+                    initSandParticles();
+                    setTimeout(hideLoader, 350);
+                    warmImagesInBackground();
                 });
             }
-            
-            // Fallback: se a internet estiver muito lenta, força a entrada após 12 segundos
-            setTimeout(() => {
-                if(loadedAssets < totalAssets) {
-                    loadedAssets = totalAssets;
-                    updateProgress();
-                }
-            }, 12000);
+
+            setFill(45); // feedback imediato enquanto as fontes chegam
+            document.fonts.ready.then(enterSite);
+
+            // Fallback: nunca prende o utilizador por mais de 4 segundos
+            setTimeout(enterSite, 4000);
+        }
+
+        // Aquece o cache de imagens uma a uma em tempo ocioso, sem competir
+        // com carregamentos disparados pelo utilizador (lazy-load, modais)
+        function warmImagesInBackground() {
+            const urls = new Set();
+            document.querySelectorAll('img').forEach(img => {
+                if (img.src) urls.add(img.src);
+            });
+            galleryImages.forEach(src => urls.add(src));
+
+            const queue = Array.from(urls);
+            const schedule = (fn) => {
+                if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 3000 });
+                else setTimeout(fn, 250);
+            };
+            const next = () => {
+                if (!queue.length) return;
+                const img = new Image();
+                img.onload = img.onerror = () => schedule(next);
+                img.src = queue.shift();
+            };
+            schedule(next);
         }
 
         // Inicia todo o processo global
