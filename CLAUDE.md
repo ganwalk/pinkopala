@@ -6,6 +6,8 @@ Guia para agentes de IA (Claude Code) trabalhando neste repositório.
 
 Site oficial da banda **Pink Opala** (indie pop, Goiânia-GO). É uma página única — `index.htm` — com todo o HTML, CSS e JavaScript inline. **Não há build, bundler, `package.json` nem testes automatizados.** O restante do repositório são imagens (capas de discos e fotos) servidas via `raw.githubusercontent.com`, que funciona como CDN.
 
+O site carrega **apenas os arquivos `.webp`**. Cada `.webp` (lado maior ≤ 2000 px, qualidade 82) tem um original `.jpg`/`.jpeg`/`.JPG`/`.JPEG` de mesmo nome-base guardado no repo como fonte em alta resolução — **não referenciado pela página**. Ao adicionar/trocar uma foto: coloque o original, gere o `.webp` (script no README) e referencie **só o `.webp`** no HTML.
+
 O idioma do site, dos comentários e dos commits é **português**. Mantenha assim.
 
 ## Como rodar
@@ -39,7 +41,7 @@ O arquivo tem três blocos, nesta ordem:
 
 - Tailwind por classes utilitárias no HTML; o que é temático usa CSS custom properties (`text-[var(--text-color)]`, etc.) para funcionar nos dois temas.
 - JavaScript vanilla, sem dependências além de Lucide (ícones). Comentários em português explicando o *porquê*.
-- URLs de imagem são absolutas para `raw.githubusercontent.com/ganwalk/pinkopala/main/...` (com espaços percent-encoded). Novos assets seguem o mesmo padrão.
+- URLs de imagem são absolutas para `raw.githubusercontent.com/ganwalk/pinkopala/main/...` (espaços como `%20`, `&` como `%26`, parênteses literais). Novos assets seguem o mesmo padrão e apontam para `.webp`.
 - Nomes de arquivo de imagem têm espaços e parênteses — sempre cite os caminhos no shell.
 
 ## Como testar mudanças

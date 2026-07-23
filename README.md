@@ -69,18 +69,17 @@ Sem dependências de build, sem `node_modules`, sem bundler.
 pinkopala/
 ├── index.htm                         # Página única — todo o HTML, CSS e JS
 │
-├── circle.jpg                        # Foto circular (seção História)
+├── *.webp                            # Imagens servidas ao site (18 arquivos, ~4,5 MB)
+│                                     #   → circle, Capa - *, Foto por *, _Foto por *
 │
-├── Capa - *.{jpg,jpeg,JPG,JPEG}     # Capas dos lançamentos (6 arquivos)
+├── *.{jpg,jpeg,JPG,JPEG}            # Originais em alta resolução (18 arquivos, ~57 MB)
+│                                     #   mantidos como arquivo/fonte; NÃO usados pela página
 │
-├── Foto por Gabriel Arruda *.jpg    # Fotos de Gabriel Arruda (3 arquivos)
-├── Foto por Geovana Moura *.jpg     # Fotos de Geovana Moura (2 arquivos)
-├── _Foto por Geovana Moura *.jpg    # Fotos de Geovana Moura — série 2 (5 arquivos)
-│
-└── README.md
+├── README.md
+└── CLAUDE.md                         # Guia para agentes de IA
 ```
 
-As imagens são referenciadas via URL raw do GitHub (`raw.githubusercontent.com`), então o repositório funciona como CDN próprio.
+As imagens **servidas ao site são as `.webp`**, referenciadas via URL raw do GitHub (`raw.githubusercontent.com`), então o repositório funciona como CDN próprio. Cada `.webp` tem um `.jpg`/`.jpeg`/`.JPG`/`.JPEG` de mesmo nome-base guardado como original em alta resolução — não é carregado pela página.
 
 ---
 
@@ -106,6 +105,23 @@ Depois abra `http://localhost:8080` no navegador.
 ---
 
 ## Decisões Técnicas
+
+### Imagens em WebP redimensionadas
+
+Todas as imagens exibidas são `.webp` com o lado maior limitado a 2000 px (qualidade 82). Os originais chegavam a 6720 px e ~9 MB cada; como a página nunca mostra nada maior que tela cheia, o conjunto caiu de **~57 MB para ~4,5 MB (−92%)** sem perda visível. Os JPEGs originais em alta resolução permanecem no repositório como arquivo/fonte, mas não são carregados pela página.
+
+Para regenerar após adicionar/trocar um original:
+
+```bash
+python3 - <<'PY'
+from PIL import Image; import glob, os
+for f in glob.glob('*.jpg')+glob.glob('*.jpeg')+glob.glob('*.JPG')+glob.glob('*.JPEG'):
+    im = Image.open(f).convert('RGB'); w, h = im.size
+    if max(w, h) > 2000:
+        s = 2000/max(w, h); im = im.resize((round(w*s), round(h*s)), Image.LANCZOS)
+    im.save(os.path.splitext(f)[0]+'.webp', 'WEBP', quality=82, method=6)
+PY
+```
 
 ### Preloader que só bloqueia no essencial
 
