@@ -10,6 +10,11 @@ O site carrega **apenas os arquivos `.webp`**. Cada `.webp` (lado maior ≤ 2000
 
 O idioma do site, dos comentários e dos commits é **português**. Mantenha assim.
 
+## Dois artefatos
+
+- **`index.htm`** — documento HTML completo, é o site standalone (GitHub Pages, branch `main`). É a **fonte da verdade**: mudanças de conteúdo/lógica começam aqui.
+- **`pinkopala-elementor.html`** — versão **fragmento** do mesmo site para colar num widget HTML do WordPress + Elementor. É **derivada** do `index.htm`: sem tags de documento, tudo dentro de `<div id="pinkopala-app">`, CSS escopado, Tailwind com `preflight: false`, funções em `window.pinkopala.*`, boot por `readyState` com guarda de reentrância, e offset da barra de admin. Ao alterar o `index.htm`, replique a mudança aqui (ver seção de embed no README).
+
 ## Como rodar
 
 ```bash

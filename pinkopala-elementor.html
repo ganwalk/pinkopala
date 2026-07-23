@@ -1,0 +1,1189 @@
+<!--
+  ===========================================================================
+  PINK OPALA — WIDGET PARA WORDPRESS + ELEMENTOR
+  ===========================================================================
+  Cole TODO este conteúdo num widget "HTML" do Elementor.
+
+  Recomendações para funcionar 100%:
+   • Use um modelo de página "Elementor Full Width" ou "Canvas" (sem o
+     cabeçalho/rodapé do tema), pois o hero ocupa a viewport inteira e a nav
+     é fixa no topo.
+   • Coloque o widget numa seção/contêiner SEM "overflow: hidden" e SEM
+     transform/filtro nos ancestrais (isso quebra position: sticky do hero).
+   • Deixe este widget como único conteúdo da seção, ocupando a largura total.
+
+  Isolamento: todo o CSS está escopado em #pinkopala-app e um reset via
+  :where() protege o app do CSS do tema sem sobrepor os utilitários do
+  Tailwind. O Tailwind é carregado com o "preflight" (reset global)
+  DESLIGADO, para não alterar o resto do site WordPress.
+  ===========================================================================
+-->
+
+<!-- Tailwind Play CDN com reset global (preflight) desligado -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Precisa vir logo após o script acima (que roda de forma síncrona):
+  // desliga o preflight ANTES do primeiro build, evitando que o reset
+  // global do Tailwind vaze e altere o tema do WordPress.
+  if (window.tailwind) { tailwind.config = { corePlugins: { preflight: false } }; }
+</script>
+
+<!-- Ícones e fontes -->
+<script src="https://unpkg.com/lucide@latest" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+    /* =====================================================================
+       RESET DE ISOLAMENTO — o :where() não soma especificidade, então cada
+       regra pesa como o seletor final (ex.: `img` = 0,0,1), igual às regras
+       de elemento do tema. Assim ele VENCE o CSS do tema por ordem (este
+       <style> carrega depois) e CEDE aos utilitários do Tailwind (classe =
+       0,1,0). É o mesmo mecanismo do preflight do Tailwind, porém escopado.
+       ===================================================================== */
+    :where(#pinkopala-app), :where(#pinkopala-app) * ,
+    :where(#pinkopala-app) *::before, :where(#pinkopala-app) *::after { box-sizing: border-box; }
+    :where(#pinkopala-app) { line-height: 1.4; -webkit-text-size-adjust: 100%; text-align: left; }
+    :where(#pinkopala-app) h1, :where(#pinkopala-app) h2, :where(#pinkopala-app) h3,
+    :where(#pinkopala-app) p, :where(#pinkopala-app) figure { margin: 0; }
+    :where(#pinkopala-app) ul, :where(#pinkopala-app) li { margin: 0; padding: 0; list-style: none; }
+    :where(#pinkopala-app) a { color: inherit; text-decoration: none; }
+    :where(#pinkopala-app) img, :where(#pinkopala-app) canvas, :where(#pinkopala-app) svg { display: block; max-width: none; border: 0; }
+    :where(#pinkopala-app) button { font: inherit; color: inherit; background: none; border: 0; margin: 0; padding: 0; cursor: pointer; }
+    :where(#pinkopala-app) input, :where(#pinkopala-app) textarea { font: inherit; color: inherit; margin: 0; }
+
+    /* Variáveis de tema (escopo do app; light-mode alterna na raiz) */
+    #pinkopala-app {
+        --neon-pink: #ff00aa;
+        --bg-color: #000000;
+        --bg-rgb: 0, 0, 0;
+        --text-color: #ffffff;
+        --muted-color: #9ca3af;
+        --border-color: rgba(255, 255, 255, 0.15);
+        --panel-bg: #111111;
+
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Space Grotesk', sans-serif;
+        /* clip (não hidden): evita virar contêiner de rolagem e quebrar o
+           position: sticky do hero, mas ainda corta overflow horizontal */
+        overflow-x: clip;
+        transition: background-color 0.5s ease, color 0.5s ease;
+        position: relative;
+    }
+    #pinkopala-app.light-mode {
+        --bg-color: #ffffff;
+        --bg-rgb: 255, 255, 255;
+        --text-color: #000000;
+        --muted-color: #4b5563;
+        --border-color: rgba(0, 0, 0, 0.15);
+        --panel-bg: #f9fafb;
+    }
+
+    #pinkopala-app ::selection { background: var(--neon-pink); color: var(--bg-color); }
+
+    #pinkopala-app h1, #pinkopala-app h2, #pinkopala-app h3, #pinkopala-app .font-display {
+        font-family: 'Archivo Black', sans-serif;
+        text-transform: uppercase;
+    }
+
+    #pinkopala-app .nav-link { position: relative; transition: color 0.3s ease; }
+    #pinkopala-app .nav-link:hover { color: var(--neon-pink); }
+
+    #pinkopala-app .spin-slow { animation: po-spin 10s linear infinite; }
+    @keyframes po-spin { 100% { transform: rotate(360deg); } }
+
+    #pinkopala-app .title-glow { text-shadow: 0 0 80px rgba(255, 0, 170, 0.15); }
+
+    /* Scrollbar interna (áreas roláveis dos modais) — escopada ao app */
+    #pinkopala-app ::-webkit-scrollbar { width: 8px; }
+    #pinkopala-app ::-webkit-scrollbar-track { background: var(--bg-color); }
+    #pinkopala-app ::-webkit-scrollbar-thumb { background: var(--muted-color); }
+    #pinkopala-app ::-webkit-scrollbar-thumb:hover { background: var(--neon-pink); }
+
+    #pinkopala-app .scroll-hero {
+        height: 100vh; height: 100dvh;
+        position: sticky; top: 0; z-index: 1;
+    }
+    #pinkopala-app .sticky-hero {
+        position: sticky; top: 0;
+        height: 100vh; height: 100dvh;
+        width: 100%; overflow: hidden;
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+    }
+    #pinkopala-app .intro-content { text-align: center; will-change: opacity, transform; z-index: 10; position: relative; }
+    #pinkopala-app #discover-indicator { left: 50%; transform: translateX(-50%); }
+
+    /* Empilhamento crítico (não depende do CDN do Tailwind): o dashboard
+       precisa pintar acima do hero sticky para receber cliques. */
+    #pinkopala-app .dash-container {
+        max-width: 1600px; margin: 0 auto;
+        position: relative; z-index: 10;
+        background-color: var(--bg-color);
+    }
+
+    #pinkopala-app .hide-scrollbar::-webkit-scrollbar { display: none; }
+    #pinkopala-app .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    #pinkopala-app.is-loading { overflow: hidden; }
+
+    @property --fill { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+
+    #pinkopala-app #loading-screen {
+        position: fixed; inset: 0; z-index: 10000;
+        background-color: #000000;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.7s ease;
+    }
+    #pinkopala-app #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+    #pinkopala-app .loading-title {
+        font-family: 'Archivo Black', sans-serif; text-transform: uppercase;
+        font-size: clamp(3rem, 14vw, 9rem); line-height: 0.85;
+        text-align: center; letter-spacing: -0.04em;
+        background: linear-gradient(to top, #ff00aa var(--fill), #ffffff var(--fill));
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: --fill 0.4s ease;
+    }
+
+    #pinkopala-app #top-nav { transition: background 0.5s ease, border-color 0.5s ease, backdrop-filter 0.5s ease; }
+    #pinkopala-app #top-nav.nav-active {
+        background: rgba(var(--bg-rgb), 0.95);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-color);
+    }
+    #pinkopala-app #nav-logo, #pinkopala-app #nav-links { transition: opacity 0.4s ease; }
+
+    /* Desloca a nav fixa abaixo da barra de admin do WordPress (usuário logado) */
+    body.admin-bar #pinkopala-app #top-nav { top: 32px; }
+    @media screen and (max-width: 782px) {
+        body.admin-bar #pinkopala-app #top-nav { top: 46px; }
+    }
+
+    @media (max-width: 767px) {
+        #pinkopala-app #discover-indicator { display: none !important; }
+    }
+
+    /* Promove o canvas a uma camada própria (composição em GPU) */
+    #pinkopala-app #sand-canvas { transform: translateZ(0); }
+
+    /* Respeita quem prefere menos movimento — escopado ao app */
+    @media (prefers-reduced-motion: reduce) {
+        #pinkopala-app, #pinkopala-app *, #pinkopala-app *::before, #pinkopala-app *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+
+<div id="pinkopala-app" class="is-loading">
+    <!-- Tela de Carregamento -->
+        <div id="loading-screen">
+            <h1 class="loading-title">PINK<br>OPALA</h1>
+        </div>
+
+        <!-- Navegação Superior — sempre visível, toggle integrado -->
+        <nav id="top-nav" class="fixed top-0 w-full z-[200] p-4 md:p-6 flex items-center text-[var(--text-color)]">
+            <button id="nav-logo" class="text-xl md:text-2xl font-display tracking-tighter hover:text-[var(--neon-pink)] focus:outline-none opacity-0 pointer-events-none" style="transition:opacity 0.4s ease">
+                PINK OPALA
+            </button>
+            <ul id="nav-links" class="flex space-x-3 sm:space-x-4 md:space-x-8 text-[9px] md:text-sm font-bold tracking-widest font-mono ml-auto mr-3 md:mr-5 opacity-0 pointer-events-none">
+                <li class="hidden sm:block"><a href="#historia" class="nav-link">HISTÓRIA</a></li>
+                <li><a href="#discografia" class="nav-link">DISCOGRAFIA</a></li>
+                <li><a href="#fotos" class="nav-link">GALERIA</a></li>
+                <li><a href="#contacto" class="nav-link">CONTATO</a></li>
+            </ul>
+            <button id="theme-toggle" class="flex-shrink-0 flex items-center justify-center text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors" title="Mudar Tema">
+                <span class="icon-sun block"><i data-lucide="sun" class="w-5 h-5"></i></span>
+                <span class="icon-moon hidden"><i data-lucide="moon" class="w-5 h-5"></i></span>
+            </button>
+        </nav>
+
+        <section id="hero" class="scroll-hero">
+            <div class="sticky-hero">
+
+                <!-- Canvas para o Efeito de Partículas (Areia) -->
+                <canvas id="sand-canvas" class="absolute inset-0 w-full h-full z-[12]" style="pointer-events: none;"></canvas>
+
+                <div class="intro-content w-full" id="intro-content">
+                    <h1 id="main-title" class="text-[21vw] sm:text-[9rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] tracking-tighter whitespace-nowrap title-glow inline-block relative cursor-pointer">
+                        <span id="pink-text" class="transition-opacity duration-500 inline-block">PINK</span><br>
+                        <span id="pala-text" class="transition-opacity duration-500 inline-block">OPALA</span>
+                    </h1>
+
+                    <div id="discover-indicator" class="absolute top-[100%] pt-2 sm:pt-1 flex flex-col items-center opacity-0 cursor-pointer transition-opacity duration-300">
+                        <i data-lucide="arrow-down" class="w-5 h-5 sm:w-6 sm:h-6 text-[var(--neon-pink)] animate-bounce mb-1 sm:mb-2"></i>
+                        <span id="discover-text" class="text-[10px] sm:text-xs text-[var(--neon-pink)] uppercase tracking-widest font-mono text-center">NOS CONHEÇA</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOVO DASHBOARD APÓS O SCROLL -->
+        <main class="dash-container px-4 md:px-8 pt-24 md:pt-28 pb-20 relative z-10 bg-[var(--bg-color)] transition-colors duration-500">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+                <div id="historia" class="flex flex-col gap-6 scroll-mt-32">
+                    <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">HISTÓRIA</h2>
+                    <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/circle.webp" alt="Banda Pink Opala" loading="lazy" class="w-full h-auto rounded-sm border border-[var(--border-color)]">
+                    <div class="text-xs text-[var(--muted-color)] space-y-4 leading-relaxed text-justify pr-2 transition-colors">
+                        <p><strong class="text-[var(--text-color)]">FORMAÇÃO:</strong> Composto por Nataly Martins (voz, letras e sintetizadores) e João Victor Santana Campos (guitarra e programações), o projeto destaca-se pela construção artesanal de uma identidade sonora e visual consistente e letras em português.</p>
+                        <button onclick="pinkopala.openModal('modal-historia')" class="text-[var(--text-color)] font-bold text-[10px] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest border-b border-[var(--border-color)] hover:border-[var(--neon-pink)] pb-0.5 inline-flex items-center gap-1 w-fit mt-2">Saiba Mais <i data-lucide="plus" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+
+                <div id="discografia" class="flex flex-col gap-6 scroll-mt-32">
+                    <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">DISCOGRAFIA</h2>
+                
+                    <!-- 2019: Bambolla Bakers -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Bambolla%20Bakers%20%26%20Pink%20Opala.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">EP: Bambolla Bakers & Pink Opala (2019)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/1WVmAHY8lAaJJrSIrpqUMHsyTnUQtfVoL?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1FzdrlpF2tPoLcav73Vf4FwKBbiquzqJZ?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2020: Toda Vida -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Toda%20Vida.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Single: Toda Vida (2020)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/1q1TGiAvKPx-V_uF-TAH29NsxtbIENcIy?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1N7n2MK5bXEA9-C3YcqkRt7e67Vu5bvMu?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2022: Madrugada -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Madrugada.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">EP: Madrugada (2022)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/1EXqciZceZTUzLbsShr-MObo4UukB6ge4?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1NN_kSJmn7LWyR9KlDbvVDPEepizlJcyI?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2024: Sempre Nunca -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Sempre%20Nunca.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Álbum: Sempre Nunca (2024)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/1QnTd6n0UC_MAURguB2AcpDIsUuQfo7G7?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1liqQDGzv15mqLiT4dq-AI0cnNIce2JX7?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2025: Flores Vivas -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Flores%20Vivas.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">EP: Flores Vivas (2025)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/12wR08FgS3ybpxDOqwvUKWm1oVEwMiGUd?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1xXfP-yIKNHQ4-H83U2mehgBMBBWrTwXn?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2026: Fascínio Frisson -->
+                    <div class="flex gap-4 items-center group">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Fasc%C3%ADnio%20Frisson.webp" alt="Capa" loading="lazy" onclick="pinkopala.openImageModal(this.src)" class="w-14 h-14 object-cover rounded-sm transition-all cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)]">
+                        <div class="flex-1 flex flex-col gap-1.5">
+                            <span class="text-[10px] font-bold font-mono text-[var(--text-color)] transition-colors leading-tight">Single: Fascínio Frisson (2026)</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[8px] font-mono text-[var(--muted-color)] uppercase tracking-tighter">Baixar:</span>
+                                <a href="https://drive.google.com/drive/folders/1xXfP-yIKNHQ4-H83U2mehgBMBBWrTwXn?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a>
+                                <a href="https://drive.google.com/drive/folders/1tqAjhDiSsbB7mblGdXmKyltW4Lf2L5Nw?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[8px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="fotos" class="flex flex-col gap-6 scroll-mt-32">
+                    <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">GALERIA</h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.webp" loading="lazy" onclick="pinkopala.openGalleryModal(0)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura%20copiar.webp" loading="lazy" onclick="pinkopala.openGalleryModal(1)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(1)%20copiar.webp" loading="lazy" onclick="pinkopala.openGalleryModal(2)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.webp" loading="lazy" onclick="pinkopala.openGalleryModal(3)" class="w-full aspect-square object-cover rounded-sm transition-all cursor-pointer border border-[var(--border-color)] hover:border-[var(--neon-pink)]">
+                    </div>
+                    <button onclick="pinkopala.openGalleryModal(0)" class="text-[var(--text-color)] font-bold text-[10px] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest border-b border-[var(--border-color)] hover:border-[var(--neon-pink)] pb-0.5 inline-flex items-center gap-1 w-fit mt-2">Ver Mais <i data-lucide="plus" class="w-3 h-3"></i></button>
+                </div>
+
+                <div id="contacto" class="flex flex-col gap-6 relative scroll-mt-32">
+                    <h2 class="text-4xl font-display tracking-tight text-[var(--text-color)]">CONTATO</h2>
+                    <form data-contact-form class="flex flex-col gap-3">
+                        <div class="flex gap-3">
+                            <input type="text" name="nome" placeholder="Nome" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                            <input type="email" name="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                        </div>
+                        <textarea name="mensagem" placeholder="Mensagem" rows="3" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
+
+                        <div class="flex flex-col sm:flex-row gap-4 sm:gap-3 items-start sm:items-center mt-2">
+                            <button type="submit" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Enviar</button>
+                        
+                            <div class="text-[10px] font-mono text-[var(--muted-color)] sm:ml-auto leading-tight text-left sm:text-right transition-colors">
+                                +55 (62) 9 8454 - 8326<br>contato@pinkopala.com<br>Goiânia - Goiás, Brasil.
+                            </div>
+                        </div>
+                    </form>
+
+                    <h2 id="links" class="text-4xl font-display tracking-tight mt-6 scroll-mt-32 text-[var(--text-color)]">LINKS E APOIO</h2>
+                    <div class="grid grid-cols-3 gap-4 mt-4">
+                        <!-- Streaming -->
+                        <div class="border-t border-[var(--border-color)] pt-3">
+                            <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Streaming</span>
+                            <ul class="space-y-1.5">
+                                <li><a href="https://www.youtube.com/@PinkOpala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>YouTube</a></li>
+                                <li><a href="https://open.spotify.com/intl-pt/artist/73KiHAF1Xe5cP6H3pZsGXy?si=Zg-3b95BQQez3qeEypZB7A" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Spotify</a></li>
+                                <li><a href="https://pinkopala.bandcamp.com/" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Bandcamp</a></li>
+                                <li><a href="https://music.apple.com/br/artist/pink-opala/1469083997" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Apple Music</a></li>
+                                <li><a href="https://tidal.com/artist/16069472" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Tidal</a></li>
+                                <li><a href="https://www.deezer.com/br/artist/67903652" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Deezer</a></li>
+                            </ul>
+                        </div>
+                        <!-- Socials -->
+                        <div class="border-t border-[var(--border-color)] pt-3">
+                            <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Socials</span>
+                            <ul class="space-y-1.5">
+                                <li><a href="https://www.instagram.com/pinkopala/" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Instagram</a></li>
+                                <li><a href="https://www.facebook.com/pinkopala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>Facebook</a></li>
+                                <li><a href="https://www.tiktok.com/@pink.opala" target="_blank" class="flex items-center gap-1 text-[10px] font-mono text-[var(--text-color)] hover:text-[var(--neon-pink)] transition-colors group">
+                                    <i data-lucide="arrow-up-right" class="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"></i>TikTok</a></li>
+                            </ul>
+                        </div>
+                        <!-- PIX -->
+                        <div class="border-t border-[var(--border-color)] pt-3">
+                            <span class="text-[8px] font-bold font-mono tracking-[0.18em] text-[var(--muted-color)] block mb-2 uppercase">Apoie</span>
+                            <p class="text-[9px] font-mono text-[var(--muted-color)] mb-1">Chave PIX (CNPJ)</p>
+                            <p class="text-[10px] font-mono font-bold text-[var(--text-color)] leading-snug mb-3">47.716.900/<br>0001-01</p>
+                            <button type="button" onclick="pinkopala.copyPix(this, 'OK')" class="border border-[var(--border-color)] text-[var(--text-color)] font-bold px-2 py-1.5 rounded-sm text-[9px] hover:border-[var(--neon-pink)] hover:text-[var(--neon-pink)] transition-colors uppercase tracking-widest flex items-center gap-1.5 w-full justify-center">
+                                <i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-16 pt-6 border-t border-[var(--border-color)] flex justify-between items-center text-right text-[10px] font-mono text-[var(--muted-color)] transition-colors">
+                <span class="text-left">GOIÂNIA, GO - BRASIL</span>
+                <span>&copy; PINK OPALA 2026</span>
+            </div>
+        </main>
+
+        <!-- Modais (Popups) -->
+        <div id="modal-historia" class="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4" onclick="if(event.target === this) pinkopala.closeModal('modal-historia')">
+            <div class="bg-[var(--panel-bg)] border border-[var(--border-color)] p-6 md:p-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-sm relative shadow-2xl transition-colors duration-500">
+                <button onclick="pinkopala.closeModal('modal-historia')" class="absolute top-4 right-4 text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <h2 class="text-3xl font-display tracking-tight text-[var(--text-color)] mb-6">HISTÓRIA</h2>
+                <div class="text-xs md:text-sm text-[var(--muted-color)] space-y-4 leading-relaxed text-justify transition-colors">
+                    <p><strong class="text-[var(--text-color)]">FORMAÇÃO:</strong> Composto por Nataly Martins (voz, letras e sintetizadores) e João Victor Santana Campos (guitarra e programações), o projeto destaca-se pela construção artesanal de uma identidade sonora e visual consistente e letras em português.</p>
+                    <p><strong class="text-[var(--text-color)]">ORIGENS:</strong> Nataly e João conheceram-se em 2013, a 14 andares de altura, através das janelas dos seus apartamentos vizinhos. Descobriram que cresceram em cidades próximas no Vale do São Patrício (GO). Começaram a namorar nesse ano, dividiram o palco em 2017 e em 2018 nasceu o Pink Opala.</p>
+                    <p><strong class="text-[var(--text-color)]">TRAJETÓRIA:</strong> Estrearam-se com o single "Espelho" (2019). Em 2020, o clipe de "Toda Vida", gravado no isolamento da pandemia, levou a música a rádios em Portugal. Participaram também de coletâneas no Reino Unido.</p>
+                    <p><strong class="text-[var(--text-color)]">SEMPRE NUNCA:</strong> O 1º álbum (2024), produzido por João Victor, apresenta 11 faixas autorais e colaborações com a banda Boogarins e Ynaiã Benthroldo. Ganhou versão em Libras, alcançou ouvintes em mais de 100 países e figurou em listas de melhores do ano.</p>
+                    <p><strong class="text-[var(--text-color)]">RECENTES:</strong> Em 2025 lançaram a live "Sessões Sempre Nunca" e o EP "Flores Vivas". Em 2026, o single "Fascínio Frisson" antecipa o segundo disco apontando para uma direção sonora mais acelerada e intensa.</p>
+                    <p><strong class="text-[var(--text-color)]">AO VIVO:</strong> Desde 2018, marcam presença em palcos como Vaca Amarela, Cidade Rock e Martim Cererê (Goiânia), Infinu (Brasília) e A Porta Maldita (SP), dividindo noites com nomes como Boogarins e Taxidermia.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-image" class="fixed inset-0 z-[300] bg-black/90 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4" onclick="pinkopala.closeModal('modal-image')">
+            <div class="relative max-w-4xl w-full flex flex-col items-center justify-center">
+                <button onclick="pinkopala.closeModal('modal-image')" class="absolute -top-12 right-0 text-white hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="x" class="w-8 h-8"></i></button>
+                <img id="modal-image-src" src="" alt="Ampliada" class="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl" onclick="event.stopPropagation()">
+            </div>
+        </div>
+
+        <!-- Modal do Carrossel da Galeria -->
+        <div id="modal-gallery" class="fixed inset-0 z-[300] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" onclick="if(event.target === this) pinkopala.closeGalleryModal()">
+            <button onclick="pinkopala.closeGalleryModal()" class="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:text-[var(--neon-pink)] transition-colors z-[310]"><i data-lucide="x" class="w-8 h-8"></i></button>
+        
+            <!-- Main Image -->
+            <div class="relative w-full max-w-5xl flex-1 flex items-center justify-center p-4 mt-12 mb-4">
+                <button onclick="pinkopala.prevGalleryImage(event)" class="absolute left-2 md:left-8 text-white hover:text-[var(--neon-pink)] transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm z-[310]"><i data-lucide="chevron-left" class="w-8 h-8"></i></button>
+            
+                <img id="gallery-main-img" src="" alt="Galeria Pink Opala" class="max-w-full max-h-[70vh] object-contain rounded-sm shadow-2xl" onclick="event.stopPropagation()">
+            
+                <button onclick="pinkopala.nextGalleryImage(event)" class="absolute right-2 md:right-8 text-white hover:text-[var(--neon-pink)] transition-colors bg-black/40 p-2 rounded-full backdrop-blur-sm z-[310]"><i data-lucide="chevron-right" class="w-8 h-8"></i></button>
+            </div>
+
+            <!-- Thumbnails Strip -->
+            <div class="w-full max-w-5xl h-20 mb-8 px-4 md:px-8 overflow-x-auto flex gap-2 items-center justify-start hide-scrollbar relative z-[310]" id="gallery-thumbnails">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Modal Discografia -->
+        <div id="modal-discografia" class="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4" onclick="if(event.target === this) pinkopala.closeModal('modal-discografia')">
+            <div class="bg-[var(--panel-bg)] border border-[var(--border-color)] p-6 md:p-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-sm relative shadow-2xl transition-colors duration-500">
+                <button onclick="pinkopala.closeModal('modal-discografia')" class="absolute top-4 right-4 text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <h2 class="text-3xl font-display tracking-tight text-[var(--text-color)] mb-8">DISCOGRAFIA</h2>
+                <div class="flex flex-col gap-6">
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Bambolla%20Bakers%20%26%20Pink%20Opala.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">EP: Bambolla Bakers & Pink Opala (2019)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/1WVmAHY8lAaJJrSIrpqUMHsyTnUQtfVoL?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1FzdrlpF2tPoLcav73Vf4FwKBbiquzqJZ?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Toda%20Vida.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">Single: Toda Vida (2020)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/1q1TGiAvKPx-V_uF-TAH29NsxtbIENcIy?usp=sharing" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1N7n2MK5bXEA9-C3YcqkRt7e67Vu5bvMu?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Madrugada.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">EP: Madrugada (2022)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/1EXqciZceZTUzLbsShr-MObo4UukB6ge4?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1NN_kSJmn7LWyR9KlDbvVDPEepizlJcyI?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Sempre%20Nunca.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">Álbum: Sempre Nunca (2024)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/1QnTd6n0UC_MAURguB2AcpDIsUuQfo7G7?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1liqQDGzv15mqLiT4dq-AI0cnNIce2JX7?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Flores%20Vivas.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">EP: Flores Vivas (2025)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/12wR08FgS3ybpxDOqwvUKWm1oVEwMiGUd?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1xXfP-yIKNHQ4-H83U2mehgBMBBWrTwXn?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <img src="https://raw.githubusercontent.com/ganwalk/pinkopala/main/Capa%20-%20Fasc%C3%ADnio%20Frisson.webp" onclick="pinkopala.openImageModal(this.src)" class="w-16 h-16 object-cover rounded-sm cursor-pointer hover:ring-2 hover:ring-[var(--neon-pink)] transition-all">
+                        <div class="flex-1 flex flex-col gap-2">
+                            <span class="text-sm font-bold font-mono text-[var(--text-color)]">Single: Fascínio Frisson (2026)</span>
+                            <div class="flex items-center gap-2"><span class="text-[10px] font-mono text-[var(--muted-color)] uppercase">Baixar:</span><a href="https://drive.google.com/drive/folders/1xXfP-yIKNHQ4-H83U2mehgBMBBWrTwXn?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">MP3</a><a href="https://drive.google.com/drive/folders/1tqAjhDiSsbB7mblGdXmKyltW4Lf2L5Nw?usp=drive_link" target="_blank" class="px-2 py-0.5 border border-[var(--border-color)] rounded-sm text-[10px] font-mono hover:bg-[var(--neon-pink)] hover:text-white transition-colors">WAV</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Contato -->
+        <div id="modal-contato" class="fixed inset-0 z-[300] bg-black/80 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4" onclick="if(event.target === this) pinkopala.closeModal('modal-contato')">
+            <div class="bg-[var(--panel-bg)] border border-[var(--border-color)] p-6 md:p-10 w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-sm relative shadow-2xl transition-colors duration-500">
+                <button onclick="pinkopala.closeModal('modal-contato')" class="absolute top-4 right-4 text-[var(--muted-color)] hover:text-[var(--neon-pink)] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <h2 class="text-3xl font-display tracking-tight text-[var(--text-color)] mb-6">CONTATO</h2>
+                <form data-contact-form class="flex flex-col gap-3 mb-8">
+                    <div class="flex gap-3">
+                        <input type="text" name="nome" placeholder="Nome" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                        <input type="email" name="email" placeholder="Email" class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]">
+                    </div>
+                    <textarea name="mensagem" placeholder="Mensagem" rows="3" required class="bg-transparent border border-[var(--border-color)] rounded-sm p-2 w-full text-xs resize-none focus:outline-none focus:border-[var(--neon-pink)] transition-colors font-mono text-[var(--text-color)]"></textarea>
+                    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center mt-1">
+                        <button type="submit" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-4 py-2 rounded-sm text-xs hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors">Enviar</button>
+                        <div class="text-[10px] font-mono text-[var(--muted-color)] sm:ml-auto leading-tight transition-colors">+55 (62) 9 8454 - 8326<br>contato@pinkopala.com<br>Goiânia - Goiás, Brasil.</div>
+                    </div>
+                </form>
+                <div class="grid grid-cols-3 gap-6 border-t border-[var(--border-color)] pt-6">
+                    <div>
+                        <span class="text-xs font-bold font-mono block mb-3 text-[var(--text-color)]">STREAMING</span>
+                        <ul class="text-xs font-mono space-y-2 text-[var(--muted-color)]">
+                            <li><a href="https://www.youtube.com/@PinkOpala" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">YouTube</a></li>
+                            <li><a href="https://open.spotify.com/intl-pt/artist/73KiHAF1Xe5cP6H3pZsGXy?si=Zg-3b95BQQez3qeEypZB7A" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Spotify</a></li>
+                            <li><a href="https://pinkopala.bandcamp.com/" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Bandcamp</a></li>
+                            <li><a href="https://music.apple.com/br/artist/pink-opala/1469083997" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Apple Music</a></li>
+                            <li><a href="https://tidal.com/artist/16069472" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Tidal</a></li>
+                            <li><a href="https://www.deezer.com/br/artist/67903652" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Deezer</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold font-mono block mb-3 text-[var(--text-color)]">SOCIALS</span>
+                        <ul class="text-xs font-mono space-y-2 text-[var(--muted-color)]">
+                            <li><a href="https://www.instagram.com/pinkopala/" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Instagram</a></li>
+                            <li><a href="https://www.facebook.com/pinkopala" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">Facebook</a></li>
+                            <li><a href="https://www.tiktok.com/@pink.opala" target="_blank" class="hover:text-[var(--neon-pink)] transition-colors">TikTok</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold font-mono block mb-3 text-[var(--text-color)]">APOIE</span>
+                        <div class="flex flex-col gap-2 text-xs font-mono text-[var(--muted-color)]">
+                            <p>Chave PIX (CNPJ):<br><span class="text-[var(--text-color)]">47.716.900/0001-01</span></p>
+                            <button type="button" onclick="pinkopala.copyPix(this, 'COPIADO!')" class="bg-[var(--text-color)] text-[var(--bg-color)] font-bold px-3 py-1.5 rounded-sm text-[10px] hover:bg-[var(--neon-pink)] hover:text-[var(--text-color)] transition-colors uppercase tracking-widest flex items-center gap-1.5 mt-1 w-fit"><i data-lucide="copy" class="w-3 h-3"></i> Copiar PIX</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<script>
+    function pinkopalaInit() {
+        if (window.__pinkopalaBooted) return;
+        window.__pinkopalaBooted = true;
+        const appRoot = document.getElementById('pinkopala-app');
+        if (!appRoot) return;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Decodificação de imagens fora da thread principal (evita jank ao rolar)
+        appRoot.querySelectorAll('img').forEach(img => { img.decoding = 'async'; });
+
+        // --- SISTEMA DE MUDANÇA DE TEMA ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const iconSun = appRoot.querySelector('.icon-sun');
+        const iconMoon = appRoot.querySelector('.icon-moon');
+
+        themeToggle.addEventListener('click', () => {
+            appRoot.classList.toggle('light-mode');
+            isLightMode = appRoot.classList.contains('light-mode');
+            const isLight = isLightMode;
+
+            // Alterna o ícone sem ter de o re-renderizar do zero
+            if (isLight) {
+                iconSun.classList.add('hidden');
+                iconSun.classList.remove('block');
+                iconMoon.classList.remove('hidden');
+                iconMoon.classList.add('block');
+            } else {
+                iconMoon.classList.add('hidden');
+                iconMoon.classList.remove('block');
+                iconSun.classList.remove('hidden');
+                iconSun.classList.add('block');
+            }
+        });
+
+        // --- INTERATIVIDADE E SCROLL ---
+        const scrollSection = appRoot.querySelector('.scroll-hero');
+        const introContent = document.getElementById('intro-content');
+        const stickyHero = appRoot.querySelector('.sticky-hero');
+        const sandCanvas = document.getElementById('sand-canvas');
+        const topNav = document.getElementById('top-nav');
+
+        let isUpdating = false;
+        let sandParticles = [];
+        let sandAnimId = null;
+        let mouseX = -9999, mouseY = -9999;
+        let sandCtx = null;
+        let isLightMode = false;
+
+        // Estado do loop de partículas — permite pausar quando ocioso/invisível
+        let heroVisible = true;
+        let sandRunning = false;
+        let idleFrames = 0;
+        const colored = []; // reutilizado a cada frame (evita pressão de GC)
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Rastrear rato e toque para o efeito da areia (reativa o loop quando ocioso)
+        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; if (!prefersReducedMotion) startSand(); }, { passive: true });
+        window.addEventListener('touchmove', (e) => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; if (!prefersReducedMotion) startSand(); }, { passive: true });
+        window.addEventListener('mouseout', () => { mouseX = -9999; mouseY = -9999; if (!prefersReducedMotion) startSand(); });
+        window.addEventListener('touchend', () => { mouseX = -9999; mouseY = -9999; if (!prefersReducedMotion) startSand(); });
+
+        function showNav() {
+            topNav.classList.add('nav-active');
+            document.getElementById('nav-logo').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('nav-links').classList.remove('opacity-0', 'pointer-events-none');
+        }
+        function hideNav() {
+            topNav.classList.remove('nav-active');
+            document.getElementById('nav-logo').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('nav-links').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function updateScrollAnim() {
+            if (!scrollSection || !introContent) return;
+
+            const dashRect = appRoot.querySelector('.dash-container').getBoundingClientRect();
+            if (dashRect.top <= 80) {
+                showNav();
+                // Dashboard cobre o hero → pausa as partículas (poupa CPU/GPU ao rolar/ler)
+                if (heroVisible) { heroVisible = false; stopSand(); }
+            } else {
+                hideNav();
+                if (!heroVisible) { heroVisible = true; startSand(); }
+            }
+
+            isUpdating = false;
+        }
+
+        // --- SISTEMA DE PARTÍCULAS DE AREIA ---
+        function initSandParticles() {
+            const pinkText = document.getElementById('pink-text');
+            const palaText = document.getElementById('pala-text');
+
+            const W = window.innerWidth;
+            const H = window.innerHeight;
+            sandCanvas.width = W;
+            sandCanvas.height = H;
+
+            // Canvas offscreen para sampling — willReadFrequently isolado aqui
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = W;
+            offCanvas.height = H;
+            const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+            const style = window.getComputedStyle(pinkText);
+            offCtx.font = `${style.fontWeight} ${style.fontSize} "Archivo Black", sans-serif`;
+            offCtx.letterSpacing = style.letterSpacing;
+            offCtx.fillStyle = '#ffffff';
+            offCtx.textBaseline = 'middle';
+            offCtx.textAlign = 'left';
+
+            const pinkRect = pinkText.getBoundingClientRect();
+            const palaRect = palaText.getBoundingClientRect();
+
+            const fontSize = parseFloat(style.fontSize);
+            const yOffset = fontSize * 0.05;
+            const xOffset = fontSize * 0.01;
+
+            offCtx.fillText(pinkText.innerText, pinkRect.left + xOffset, pinkRect.top + pinkRect.height/2 - yOffset);
+            offCtx.fillText(palaText.innerText, palaRect.left + xOffset, palaRect.top + palaRect.height/2 - yOffset);
+
+            const imgData = offCtx.getImageData(0, 0, W, H).data;
+
+            // Contexto principal cacheado sem willReadFrequently (permite aceleração por GPU)
+            sandCtx = sandCanvas.getContext('2d');
+
+            const gap = window.innerWidth < 768 ? 3 : 4; 
+            sandParticles = [];
+
+            for (let y = 0; y < sandCanvas.height; y += gap) {
+                for (let x = 0; x < sandCanvas.width; x += gap) {
+                    const alpha = imgData[(y * sandCanvas.width + x) * 4 + 3];
+                    if (alpha > 128) {
+                        // Em "reduced motion" as partículas nascem já no destino (sem dispersão)
+                        const scatterR = prefersReducedMotion ? 0 : (Math.random() * 0.5 + 0.3) * Math.min(sandCanvas.width, sandCanvas.height) * 0.25;
+                        const scatterA = Math.random() * Math.PI * 2;
+                        sandParticles.push({
+                            x: x + Math.cos(scatterA) * scatterR,
+                            y: y + Math.sin(scatterA) * scatterR,
+                            originX: x, originY: y,
+                            vx: 0,
+                            vy: 0,
+                            size: Math.random() * 1.5 + 1,
+                            mass: Math.random() * 0.6 + 0.4,
+                            colorFactor: 0
+                        });
+                    }
+                }
+            }
+
+            pinkText.style.opacity = '0';
+            palaText.style.opacity = '0';
+
+            stopSand();
+            startSand();
+        }
+
+        // Inicia o loop apenas quando faz sentido (hero visível, aba ativa, ainda não a correr)
+        function startSand() {
+            if (sandRunning || !sandCtx || !heroVisible || document.hidden) return;
+            sandRunning = true;
+            idleFrames = 0;
+            sandAnimId = requestAnimationFrame(animateSand);
+        }
+        function stopSand() {
+            sandRunning = false;
+            if (sandAnimId) { cancelAnimationFrame(sandAnimId); sandAnimId = null; }
+        }
+
+        function animateSand() {
+            if (!sandCtx) { sandRunning = false; return; }
+            sandCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+
+            const interactionRadius = sandCanvas.width < 768 ? 40 : 60;
+            const interactionRadiusSq = interactionRadius * interactionRadius;
+            const baseColor = isLightMode ? '#000000' : '#ffffff';
+
+            // Fase 1: física de todas as partículas + separação em buckets por cor
+            colored.length = 0; // reutiliza o array — sem alocação por frame
+            let maxSpeedSq = 0;
+            for (let i = 0; i < sandParticles.length; i++) {
+                const p = sandParticles[i];
+
+                const dx = mouseX - p.x;
+                const dy = mouseY - p.y;
+                const distSq = dx * dx + dy * dy;
+
+                if (distSq < interactionRadiusSq) {
+                    const dist = Math.sqrt(distSq) || 0.0001;
+                    const force = (interactionRadius - dist) / interactionRadius;
+                    const inv = 1 / dist;
+                    p.vx -= dx * inv * force * (10 / p.mass);
+                    p.vy -= dy * inv * force * (10 / p.mass);
+                    p.colorFactor = Math.min(1, p.colorFactor + 0.15);
+                } else if (p.colorFactor > 0) {
+                    p.colorFactor = Math.max(0, p.colorFactor - 0.015);
+                }
+
+                const ox = p.originX - p.x;
+                const oy = p.originY - p.y;
+                const distOriginSq = ox * ox + oy * oy;
+                const springK = distOriginSq > 64 ? 0.045 * p.mass : 0.003 * p.mass;
+                p.vx = (p.vx + ox * springK) * 0.88;
+                p.vy = (p.vy + oy * springK) * 0.88;
+                p.x += p.vx;
+                p.y += p.vy;
+
+                const sp = p.vx * p.vx + p.vy * p.vy;
+                if (sp > maxSpeedSq) maxSpeedSq = sp;
+                if (p.colorFactor > 0) colored.push(p);
+            }
+
+            // Fase 2: desenhar todas as partículas na cor base numa única passagem
+            sandCtx.fillStyle = baseColor;
+            sandCtx.beginPath();
+            for (let i = 0; i < sandParticles.length; i++) {
+                const p = sandParticles[i];
+                if (p.colorFactor === 0) sandCtx.rect(p.x, p.y, p.size, p.size);
+            }
+            sandCtx.fill();
+
+            // Fase 3: partículas coloridas (só as próximas do rato — poucas)
+            for (let i = 0; i < colored.length; i++) {
+                const p = colored[i];
+                let r, g, b;
+                if (isLightMode) {
+                    r = Math.floor(255 * p.colorFactor);
+                    g = 0;
+                    b = Math.floor(170 * p.colorFactor);
+                } else {
+                    r = 255;
+                    g = Math.floor(255 * (1 - p.colorFactor));
+                    b = Math.floor(255 - 85 * p.colorFactor);
+                }
+                sandCtx.fillStyle = `rgb(${r},${g},${b})`;
+                sandCtx.fillRect(p.x, p.y, p.size, p.size);
+            }
+
+            // Quando tudo está assentado e sem cor, pausa o loop para libertar CPU/GPU.
+            // Qualquer movimento do rato/toque reativa via startSand().
+            if (maxSpeedSq < 0.01 && colored.length === 0) {
+                if (++idleFrames > 30) { sandRunning = false; sandAnimId = null; return; }
+            } else {
+                idleFrames = 0;
+            }
+
+            sandAnimId = requestAnimationFrame(animateSand);
+        }
+
+        // Pausa quando a aba fica em segundo plano; retoma ao voltar
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopSand(); else startSand();
+        });
+
+        window.addEventListener('scroll', () => {
+            if (!isUpdating) {
+                window.requestAnimationFrame(updateScrollAnim);
+                isUpdating = true;
+            }
+        });
+
+        function reinitLayout() {
+            if (!isUpdating) { window.requestAnimationFrame(updateScrollAnim); isUpdating = true; }
+            document.getElementById('pink-text').style.opacity = '1';
+            document.getElementById('pala-text').style.opacity = '1';
+            stopSand();
+            setTimeout(initSandParticles, 100);
+        }
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            if (!isUpdating) { window.requestAnimationFrame(updateScrollAnim); isUpdating = true; }
+            resizeTimer = setTimeout(reinitLayout, 300);
+        });
+
+        window.addEventListener('orientationchange', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(reinitLayout, 400);
+        });
+
+        // Esconde a tela de carregamento e liberta o scroll
+        function hideLoader() {
+            const ls = document.getElementById('loading-screen');
+            if (!ls || ls.dataset.hidden) return;
+            ls.dataset.hidden = '1';
+            appRoot.classList.remove('is-loading');
+            ls.classList.add('fade-out');
+            setTimeout(() => ls.remove(), 700);
+        }
+
+        // Cliques e Navegações
+        const dashMain = appRoot.querySelector('.dash-container');
+
+        function scrollToExplore() {
+            if (dashMain.dataset.animating) return;
+            dashMain.dataset.animating = '1';
+
+            // Hero is sticky (z:1); main (z:10) slides up over it via translateY
+            // At scrollY=0, main is naturally 100vh below viewport → -100vh brings it to top
+            // Usa a altura real em px (não 100vh) para casar exatamente com o scrollTo
+            // final — evita o salto no mobile, onde 100vh ≠ altura real (barra de URL).
+            const heroH = scrollSection.offsetHeight;
+            const heroTop = scrollSection.getBoundingClientRect().top + window.pageYOffset;
+            dashMain.style.willChange = 'transform';
+
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                dashMain.style.transition = 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1)';
+                dashMain.style.transform = 'translateY(-' + heroH + 'px)';
+
+                dashMain.addEventListener('transitionend', () => {
+                    delete dashMain.dataset.animating;
+                    // Scroll past hero and restore normal flow
+                    window.scrollTo({ top: heroTop + heroH, behavior: 'instant' });
+                    dashMain.style.transition = '';
+                    dashMain.style.transform = '';
+                    dashMain.style.willChange = 'auto';
+                    showNav();
+                }, { once: true });
+            }));
+        }
+
+        // Hover no título mostra o indicador "NOS CONHEÇA"
+        const discoverIndicator = document.getElementById('discover-indicator');
+        introContent.addEventListener('mouseenter', () => {
+            if (discoverIndicator) discoverIndicator.style.opacity = '1';
+        });
+        introContent.addEventListener('mouseleave', () => {
+            if (discoverIndicator) discoverIndicator.style.opacity = '0';
+        });
+
+        document.getElementById('main-title').addEventListener('click', scrollToExplore);
+        discoverIndicator?.addEventListener('click', scrollToExplore);
+
+        const discoverText = document.getElementById('discover-text');
+        if (discoverText) {
+            setInterval(() => {
+                // Não troca texto com a aba oculta ou o hero fora de vista
+                if (document.hidden || !heroVisible) return;
+                setTimeout(() => discoverText.innerText = 'QUEM?', 0);
+                setTimeout(() => discoverText.innerText = 'WHO?', 500);
+                setTimeout(() => discoverText.innerText = 'GET TO KNOW US', 1000);
+                setTimeout(() => discoverText.innerText = 'NOS CONHEÇA', 2000);
+            }, 6000);
+        }
+
+
+        // --- SISTEMA DE MODAIS (Popups) ---
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100', 'pointer-events-auto');
+                document.body.style.overflow = 'hidden'; 
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('opacity-100', 'pointer-events-auto');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = ''; 
+            }
+        }
+
+        function openImageModal(src) {
+            const imgEl = document.getElementById('modal-image-src');
+            if (imgEl) {
+                imgEl.src = src;
+                openModal('modal-image');
+            }
+        }
+
+        // --- SISTEMA DA GALERIA ---
+        const galleryImages = [
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(1)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(2)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Geovana%20Moura(2)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/Foto%20por%20Gabriel%20Arruda(1)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(1)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(2)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(3)%20copiar.webp",
+            "https://raw.githubusercontent.com/ganwalk/pinkopala/main/_Foto%20por%20Geovana%20Moura(4)%20copiar.webp"
+        ];
+        let currentGalleryIndex = 0;
+        let galleryReady = false;
+
+        function initGallery() {
+            const thumbContainer = document.getElementById('gallery-thumbnails');
+            if(!thumbContainer) return;
+            galleryReady = true;
+            thumbContainer.innerHTML = '';
+            galleryImages.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.className = `h-14 w-20 md:h-16 md:w-24 flex-shrink-0 object-cover rounded-sm cursor-pointer opacity-50 hover:opacity-100 transition-all border-2 border-transparent`;
+                img.onclick = (e) => {
+                    e.stopPropagation();
+                    changeGalleryImage(index);
+                };
+                img.id = `thumb-${index}`;
+                thumbContainer.appendChild(img);
+            });
+        }
+
+        function openGalleryModal(index = 0) {
+            // Miniaturas só são criadas (e baixadas) na primeira abertura
+            if (!galleryReady) initGallery();
+            currentGalleryIndex = index;
+            changeGalleryImage(index);
+            const modal = document.getElementById('modal-gallery');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.classList.add('opacity-100', 'pointer-events-auto');
+                document.body.style.overflow = 'hidden';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        function closeGalleryModal() {
+            const modal = document.getElementById('modal-gallery');
+            if (modal) {
+                modal.classList.remove('opacity-100', 'pointer-events-auto');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = ''; 
+            }
+        }
+
+        function changeGalleryImage(index) {
+            currentGalleryIndex = index;
+            document.getElementById('gallery-main-img').src = galleryImages[index];
+            
+            // Atualizar contorno e opacidade das miniaturas
+            galleryImages.forEach((_, i) => {
+                const thumb = document.getElementById(`thumb-${i}`);
+                if (thumb) {
+                    if (i === index) {
+                        thumb.classList.remove('opacity-50', 'border-transparent');
+                        thumb.classList.add('opacity-100', 'border-[var(--neon-pink)]');
+                        thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        thumb.classList.add('opacity-50', 'border-transparent');
+                        thumb.classList.remove('opacity-100', 'border-[var(--neon-pink)]');
+                    }
+                }
+            });
+        }
+
+        function nextGalleryImage(e) {
+            if(e) e.stopPropagation();
+            const nextIndex = (currentGalleryIndex + 1) % galleryImages.length;
+            changeGalleryImage(nextIndex);
+        }
+
+        function prevGalleryImage(e) {
+            if(e) e.stopPropagation();
+            const prevIndex = (currentGalleryIndex - 1 + galleryImages.length) % galleryImages.length;
+            changeGalleryImage(prevIndex);
+        }
+
+        // Fechar modais e controlar galeria com teclado
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal('modal-historia');
+                closeModal('modal-discografia');
+                closeModal('modal-contato');
+                closeModal('modal-image');
+                closeGalleryModal();
+            }
+
+            const galleryModal = document.getElementById('modal-gallery');
+            if (galleryModal && galleryModal.classList.contains('opacity-100')) {
+                if (e.key === 'ArrowRight') nextGalleryImage();
+                if (e.key === 'ArrowLeft') prevGalleryImage();
+            }
+        });
+
+        // Nav logo: mobile → história, desktop → topo
+        document.getElementById('nav-logo').addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                document.getElementById('historia').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // Nav links: desktop → abre modal em foco; mobile → scroll normal para âncora
+        const navLinkMap = {
+            '#historia':    () => openModal('modal-historia'),
+            '#discografia': () => openModal('modal-discografia'),
+            '#fotos':       () => openGalleryModal(0),
+            '#contacto':    () => openModal('modal-contato'),
+        };
+        appRoot.querySelectorAll('#top-nav a.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (window.innerWidth >= 768) {
+                    e.preventDefault();
+                    const handler = navLinkMap[link.getAttribute('href')];
+                    if (handler) handler();
+                }
+            });
+        });
+
+        // --- FLUXO DE E-MAIL (mailto) ---
+        // Redige o e-mail com os dados dos campos e abre o cliente de e-mail
+        const CONTACT_EMAIL = 'contato@pinkopala.com';
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const nome = (form.elements.nome.value || '').trim();
+            const email = (form.elements.email.value || '').trim();
+            const mensagem = (form.elements.mensagem.value || '').trim();
+
+            const subject = nome ? `Contato pelo site — ${nome}` : 'Contato pelo site';
+            const lines = [];
+            if (nome) lines.push(`Nome: ${nome}`);
+            if (email) lines.push(`Email: ${email}`);
+            if (lines.length) lines.push('');
+            lines.push(mensagem);
+
+            window.location.href = `mailto:${CONTACT_EMAIL}` +
+                `?subject=${encodeURIComponent(subject)}` +
+                `&body=${encodeURIComponent(lines.join('\n'))}`;
+
+            // Feedback visual no botão enquanto o cliente de e-mail abre
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn && !btn.dataset.original) {
+                btn.dataset.original = btn.textContent;
+                btn.textContent = 'Abrindo e-mail…';
+                setTimeout(() => {
+                    btn.textContent = btn.dataset.original;
+                    delete btn.dataset.original;
+                }, 2500);
+            }
+        }
+        appRoot.querySelectorAll('form[data-contact-form]').forEach(form => {
+            form.addEventListener('submit', handleContactSubmit);
+        });
+
+        // --- COPIAR CHAVE PIX ---
+        function copyPix(btn, label) {
+            const pix = '47.716.900/0001-01';
+            const done = () => {
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> ${label}`;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            };
+            const legacy = () => {
+                const temp = document.createElement('textarea');
+                temp.value = pix;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+                done();
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pix).then(done).catch(legacy);
+            } else {
+                legacy();
+            }
+        }
+
+        // Expõe funções ao escopo global — necessário para onclick inline no HTML
+        window.pinkopala = {
+            openModal: openModal,
+            closeModal: closeModal,
+            openImageModal: openImageModal,
+            openGalleryModal: openGalleryModal,
+            closeGalleryModal: closeGalleryModal,
+            nextGalleryImage: nextGalleryImage,
+            prevGalleryImage: prevGalleryImage,
+            copyPix: copyPix
+        };
+
+        // --- PRELOADER ENXUTO ---
+        // Bloqueia a entrada apenas no essencial para o primeiro paint: as fontes
+        // (necessárias para desenhar as partículas do hero). Todas as imagens
+        // carregam depois, em segundo plano, sem atrasar o utilizador.
+        function startPreloader() {
+            const title = appRoot.querySelector('.loading-title');
+            let entered = false;
+
+            function setFill(pct) {
+                if (title) title.style.setProperty('--fill', `${pct}%`);
+            }
+
+            function enterSite() {
+                if (entered) return;
+                entered = true;
+                setFill(100);
+                requestAnimationFrame(() => {
+                    updateScrollAnim();
+                    initSandParticles();
+                    setTimeout(hideLoader, 350);
+                    warmImagesInBackground();
+                });
+            }
+
+            setFill(45); // feedback imediato enquanto as fontes chegam
+            document.fonts.ready.then(enterSite);
+
+            // Fallback: nunca prende o utilizador por mais de 4 segundos
+            setTimeout(enterSite, 4000);
+        }
+
+        // Aquece o cache de imagens uma a uma em tempo ocioso, sem competir
+        // com carregamentos disparados pelo utilizador (lazy-load, modais)
+        function warmImagesInBackground() {
+            const urls = new Set();
+            appRoot.querySelectorAll('img').forEach(img => {
+                if (img.src) urls.add(img.src);
+            });
+            galleryImages.forEach(src => urls.add(src));
+
+            const queue = Array.from(urls);
+            const schedule = (fn) => {
+                if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 3000 });
+                else setTimeout(fn, 250);
+            };
+            const next = () => {
+                if (!queue.length) return;
+                const img = new Image();
+                img.onload = img.onerror = () => schedule(next);
+                img.src = queue.shift();
+            };
+            schedule(next);
+        }
+
+        // Inicia todo o processo global
+        startPreloader();
+
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', pinkopalaInit);
+    } else {
+        pinkopalaInit();
+    }
+    // O Lucide carrega de forma assíncrona via CDN; tenta desenhar os ícones quando existir
+    (function ensureIcons(){ if (window.lucide) { try { lucide.createIcons(); } catch (e) {} } else { setTimeout(ensureIcons, 150); } })();
+    
+</script>
