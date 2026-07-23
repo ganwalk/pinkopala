@@ -12,6 +12,7 @@ Site oficial da banda **Pink Opala**, desenvolvido como uma única página (`ind
 - [Tecnologias](#tecnologias)
 - [Estrutura do Repositório](#estrutura-do-repositório)
 - [Como Executar Localmente](#como-executar-localmente)
+- [Embed no WordPress + Elementor](#embed-no-wordpress--elementor)
 - [Decisões Técnicas](#decisões-técnicas)
 - [Acessibilidade e Performance](#acessibilidade-e-performance)
 - [Contribuição](#contribuição)
@@ -67,7 +68,8 @@ Sem dependências de build, sem `node_modules`, sem bundler.
 
 ```
 pinkopala/
-├── index.htm                         # Página única — todo o HTML, CSS e JS
+├── index.htm                         # Página única (site standalone / GitHub Pages)
+├── pinkopala-elementor.html          # Fragmento pronto p/ widget HTML do Elementor
 │
 ├── *.webp                            # Imagens servidas ao site (18 arquivos, ~4,5 MB)
 │                                     #   → circle, Capa - *, Foto por *, _Foto por *
@@ -101,6 +103,37 @@ npx serve .
 Depois abra `http://localhost:8080` no navegador.
 
 > Abrir `index.htm` diretamente como `file://` também funciona, mas algumas fontes e ícones podem não carregar por restrições CORS do browser.
+
+---
+
+## Embed no WordPress + Elementor
+
+O arquivo **`pinkopala-elementor.html`** é uma versão do site pronta para ser colada num widget **HTML** do Elementor, sem quebrar o resto do site WordPress e sem ser quebrada por ele. Diferente do `index.htm` (documento completo), esta versão é um **fragmento**: sem `<!DOCTYPE>`/`<html>`/`<head>`/`<body>`, com tudo dentro de um único `<div id="pinkopala-app">`.
+
+**Como usar:**
+
+1. Copie **todo** o conteúdo de `pinkopala-elementor.html`.
+2. No Elementor, adicione um widget **HTML** e cole o conteúdo.
+3. Use um modelo de página **Elementor Full Width** ou **Canvas** (sem cabeçalho/rodapé do tema) — o hero ocupa a viewport inteira e a navegação é fixa.
+4. Coloque o widget como único conteúdo da seção, em largura total, numa seção **sem** `overflow: hidden` e **sem** `transform`/`filter` nos ancestrais (ambos quebram o `position: sticky` do hero).
+
+**O que garante o isolamento:**
+
+| Problema no Elementor | Solução aplicada |
+|---|---|
+| CSS do tema vaza para dentro do app | Reset escopado com `:where(#pinkopala-app)` — mesma especificidade das regras de elemento do tema, vence por ordem de carregamento e cede aos utilitários do Tailwind |
+| Reset global do Tailwind (Preflight) altera o site inteiro | Tailwind carregado com `corePlugins: { preflight: false }` |
+| Todo o CSS temático global (`body`, `h1/h2/h3`, scrollbar, `*`) vazava | Tudo reescopado sob `#pinkopala-app` |
+| `DOMContentLoaded` já disparou antes do widget rodar | `pinkopalaInit()` roda por `readyState` (imediato se o DOM já está pronto) |
+| Widget re-renderizado no editor duplicava listeners | Guarda de reentrância `window.__pinkopalaBooted` |
+| Funções globais (`openModal`…) colidiam com temas/plugins | Namespace único `window.pinkopala.*` |
+| Barra de admin do WordPress cobria a nav fixa | Offset via `body.admin-bar #pinkopala-app #top-nav` |
+| Tema com cabeçalho acima quebrava o scroll do hero | Scroll usa a posição absoluta real do hero |
+| `overflow-x` do wrapper viraria contêiner de rolagem | Usa `overflow-x: clip` (não cria scroll container) |
+
+> **Ressalvas do modo nativo (por isso "quase 100%"):** o Tailwind Play CDN observa o documento inteiro e gera utilitários globalmente — se o **tema** usar nomes de classe genéricos como `.container`, o Tailwind pode influenciá-los. Além disso, um tema que estilize `<a>` com especificidade maior que um seletor de elemento pode tingir alguns links. Para isolamento absoluto, use um `<iframe>` em vez do embed nativo.
+>
+> As imagens continuam vindo do `raw.githubusercontent.com` (branch `main`) — os `.webp` precisam estar publicados na `main` para aparecerem.
 
 ---
 
