@@ -71,11 +71,12 @@ pinkopala/
 ├── index.htm                         # Página única (site standalone / GitHub Pages)
 ├── pinkopala-elementor.html          # Fragmento pronto p/ widget HTML do Elementor
 │
-├── *.webp                            # Imagens servidas ao site (18 arquivos, ~4,5 MB)
-│                                     #   → circle, Capa - *, Foto por *, _Foto por *
+├── *.webp                            # Imagens servidas ao site (19 arquivos, ~5,3 MB)
+│                                     #   → principal, Capa - *, Foto por *, _Foto por *
 │
-├── *.{jpg,jpeg,JPG,JPEG}            # Originais em alta resolução (18 arquivos, ~57 MB)
+├── *.{jpg,jpeg,JPG,JPEG}            # Originais em alta resolução (19 arquivos, ~67 MB)
 │                                     #   mantidos como arquivo/fonte; NÃO usados pela página
+│                                     #   (inclui circle.jpg/.webp, não mais referenciados)
 │
 ├── README.md
 └── CLAUDE.md                         # Guia para agentes de IA
